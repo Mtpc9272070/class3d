@@ -4,724 +4,210 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ClassManager Pro</title>
-  
-  <!-- Soportes de PWA e Instalación -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0d10" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ClassManager" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  
   <style>
-    :root {
-      --bg-dark: #0b0d10;
-      --card-bg: #15181e;
-      --card-hover: #1e222a;
-      --accent-orange: #ff6600;
-      --accent-green: #00d26a;
-      --accent-red: #ff4d4d;
-      --text-main: #ffffff;
-      --text-muted: #8e95a5;
-      --border-color: #242936;
-      --radius: 20px;
-      --transition-speed: 0.3s;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* BARRA DE ESTADO DE CONEXIÓN */
-    #offline-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--accent-red);
-      color: #fff;
-      text-align: center;
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      z-index: 99999;
-      display: none;
-    }
-
-    .icon {
-      width: 18px;
-      height: 18px;
-      stroke-width: 2;
-      stroke: currentColor;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    /* SPLASH SCREEN CON LOGO SVG */
-    #splash-screen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg-dark);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      transition: opacity 0.6s ease, visibility 0.6s ease;
-    }
-
-    #splash-screen.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .splash-logo {
-      width: 90px;
-      height: 90px;
-      background: var(--accent-orange);
-      border-radius: 28px;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 0 40px rgba(255, 102, 0, 0.4);
-      animation: logoEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards;
-    }
-
-    .splash-title {
-      margin-top: 20px;
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      animation: textFadeUp 0.8s ease 0.3s forwards;
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    .splash-subtitle {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 6px;
-      animation: textFadeUp 0.8s ease 0.5s forwards;
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    @keyframes logoEntrance {
-      0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-
-    @keyframes textFadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .app-viewport {
-      width: 100%;
-      max-width: 480px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      background: var(--bg-dark);
-      padding-bottom: 90px;
-    }
-
-    header {
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(21, 24, 30, 0.85);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .menu-toggle {
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      padding: 6px;
-    }
-
-    .menu-toggle span {
-      display: block;
-      width: 22px;
-      height: 2.5px;
-      background: var(--text-main);
-      border-radius: 4px;
-    }
-
-    .brand-mini {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-icon {
-      width: 34px;
-      height: 34px;
-      background: var(--accent-orange);
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      color: #000;
-      box-shadow: 0 0 15px rgba(255, 102, 0, 0.3);
-    }
-
-    .brand-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-    }
-
-    /* DRAWER */
-    .drawer-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(6px);
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .drawer-overlay.active { opacity: 1; visibility: visible; }
-
-    .drawer {
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: 280px;
-      background: var(--card-bg);
-      z-index: 1001;
-      transform: translateX(-100%);
-      transition: transform var(--transition-speed) cubic-bezier(0.1, 0.9, 0.2, 1);
-      padding: 30px 20px;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--border-color);
-    }
-
-    .drawer.active { transform: translateX(0); }
-
-    .drawer-nav {
-      margin-top: 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .drawer-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      color: var(--text-muted);
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.25s, color 0.25s;
-    }
-
-    .drawer-item.active, .drawer-item:hover {
-      background: rgba(255, 102, 0, 0.15);
-      color: var(--accent-orange);
-    }
-
-    .content-container { padding: 20px; }
-
-    .tab-content {
-      display: none;
-      animation: sectionSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .tab-content.active { display: block; }
-
-    @keyframes sectionSlideIn {
-      from { opacity: 0; transform: translateY(18px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .stats-card {
-      background: linear-gradient(135deg, #1d212a 0%, #15181e 100%);
-      border-radius: var(--radius);
-      padding: 20px;
-      border: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-    }
-
-    .stat-item label {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      font-weight: 700;
-    }
-
-    .stat-item span {
-      display: block;
-      font-size: 1.45rem;
-      font-weight: 800;
-      margin-top: 4px;
-      color: var(--accent-green);
-    }
-
-    /* CALENDARIO STRIP AMPLIADO */
-    .calendar-strip {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-    }
-    .calendar-strip::-webkit-scrollbar { display: none; }
-
-    .day-pill {
-      min-width: 62px;
-      padding: 12px 8px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-    }
-
-    .day-pill .day-name {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    .day-pill .day-number {
-      font-size: 1.1rem;
-      font-weight: 800;
-      margin-top: 4px;
-      color: var(--text-main);
-    }
-
-    .day-pill.active {
-      background: var(--accent-orange);
-      border-color: var(--accent-orange);
-      box-shadow: 0 4px 15px rgba(255, 102, 0, 0.35);
-    }
-
-    .day-pill.active .day-name, .day-pill.active .day-number { color: #000; }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 20px;
-      border: 1px solid var(--border-color);
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-
-    .card h2 {
-      font-size: 1.1rem;
-      margin-bottom: 16px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .form-group { margin-bottom: 14px; }
-    .form-group label {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 14px;
-      background: var(--bg-dark);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      color: #fff;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 16px;
-      background: var(--accent-orange);
-      color: #000;
-      font-weight: 800;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      font-size: 1rem;
-      box-shadow: 0 4px 15px rgba(255, 102, 0, 0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .class-card, .client-card {
-      background: var(--card-hover);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-left: 4px solid var(--accent-orange);
-      animation: cardAppear 0.35s ease forwards;
-    }
-
-    @keyframes cardAppear {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .class-card.completed {
-      border-left-color: var(--accent-green);
-      opacity: 0.85;
-      background: rgba(0, 210, 106, 0.05);
-    }
-
-    .class-info h3, .client-info h3 {
-      font-size: 1rem;
-      margin-bottom: 4px;
-      font-weight: 700;
-    }
-
-    .class-info p, .client-info p {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .action-buttons {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .check-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 8px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .check-btn.active {
-      background: var(--accent-green);
-      color: #000;
-    }
-
-    .delete-btn {
-      background: rgba(255, 77, 77, 0.1);
-      border: 1px solid rgba(255, 77, 77, 0.3);
-      color: var(--accent-red);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-    }
-
-    .income-group {
-      background: var(--card-bg);
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      border: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      display: grid;
-      place-items: center;
-      z-index: 2000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .modal-overlay.active { opacity: 1; visibility: visible; }
-
-    .modal-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 28px 22px;
-      border-radius: 24px;
-      text-align: center;
-      width: 85%;
-      max-width: 340px;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 480px;
-      background: rgba(21, 24, 30, 0.95);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      z-index: 100;
-    }
-
-    .nav-button {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      cursor: pointer;
-      width: 25%;
-    }
-
-    .nav-button.active { color: var(--accent-orange); }
-
-    #pwa-install-btn {
-      display: none;
-      background: rgba(255, 102, 0, 0.15);
-      color: var(--accent-orange);
-      border: 1px solid var(--accent-orange);
-      padding: 10px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      margin-top: 15px;
-      width: 100%;
-    }
+    :root{--bg-dark:#0b0d10;--card-bg:#15181e;--card-hover:#1e222a;--accent-orange:#ff6600;--accent-green:#00d26a;--accent-red:#ff4d4d;--text-main:#fff;--text-muted:#8e95a5;--border-color:#242936;--radius:20px;--transition-speed:.3s}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-tap-highlight-color:transparent}
+    body{background:var(--bg-dark);color:var(--text-main);display:flex;justify-content:center;min-height:100vh;overflow-x:hidden}
+    #offline-banner{position:fixed;top:0;left:0;right:0;background:var(--accent-red);color:#fff;text-align:center;padding:6px 12px;font-size:.8rem;font-weight:700;z-index:99999;display:none}
+    .icon{width:18px;height:18px;stroke-width:2;stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle}
+    #splash-screen{position:fixed;inset:0;background:var(--bg-dark);z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:opacity .6s ease,visibility .6s ease}
+    #splash-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .splash-logo{width:90px;height:90px;background:var(--accent-orange);border-radius:28px;display:grid;place-items:center;box-shadow:0 0 40px rgba(255,102,0,.4);animation:logoEntrance 1s cubic-bezier(.175,.885,.32,1.27) forwards}
+    .splash-title{margin-top:20px;font-size:1.8rem;font-weight:800;letter-spacing:-.5px;animation:textFadeUp .8s ease .3s forwards;opacity:0;transform:translateY(20px)}
+    .splash-subtitle{color:var(--text-muted);font-size:.9rem;margin-top:6px;animation:textFadeUp .8s ease .5s forwards;opacity:0;transform:translateY(20px)}
+    @keyframes logoEntrance{0%{transform:scale(0) rotate(-180deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+    @keyframes textFadeUp{to{opacity:1;transform:translateY(0)}}
+    .app-viewport{width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-dark);padding-bottom:90px}
+    header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;background:rgba(21,24,30,.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border-color)}
+    .menu-toggle{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:6px}
+    .menu-toggle span{display:block;width:22px;height:2.5px;background:var(--text-main);border-radius:4px}
+    .brand-mini{display:flex;align-items:center;gap:10px}
+    .brand-icon{width:34px;height:34px;background:var(--accent-orange);border-radius:10px;display:grid;place-items:center;color:#000;box-shadow:0 0 15px rgba(255,102,0,.3)}
+    .brand-title{font-size:1.15rem;font-weight:800;letter-spacing:-.3px}
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:1000;opacity:0;visibility:hidden;transition:all .3s ease}
+    .drawer-overlay.active{opacity:1;visibility:visible}
+    .drawer{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--card-bg);z-index:1001;transform:translateX(-100%);transition:transform var(--transition-speed) cubic-bezier(.1,.9,.2,1);padding:30px 20px;display:flex;flex-direction:column;border-right:1px solid var(--border-color)}
+    .drawer.active{transform:translateX(0)}
+    .drawer-nav{margin-top:30px;display:flex;flex-direction:column;gap:10px}
+    .drawer-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;color:var(--text-muted);font-weight:600;cursor:pointer;transition:background .25s,color .25s}
+    .drawer-item.active,.drawer-item:hover{background:rgba(255,102,0,.15);color:var(--accent-orange)}
+    .content-container{padding:20px}
+    .tab-content{display:none;animation:sectionSlideIn .4s cubic-bezier(.16,1,.3,1) forwards}
+    .tab-content.active{display:block}
+    @keyframes sectionSlideIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .stats-card{background:linear-gradient(135deg,#1d212a 0%,#15181e 100%);border-radius:var(--radius);padding:20px;border:1px solid var(--border-color);display:flex;justify-content:space-between;margin-bottom:20px;box-shadow:0 10px 25px rgba(0,0,0,.35)}
+    .stat-item label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+    .stat-item span{display:block;font-size:1.45rem;font-weight:800;margin-top:4px;color:var(--accent-green)}
+    .calendar-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;margin-bottom:20px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .calendar-strip::-webkit-scrollbar{display:none}
+    .day-pill{min-width:62px;padding:12px 8px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;text-align:center;cursor:pointer;transition:all .2s ease;flex-shrink:0}
+    .day-pill .day-name{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;font-weight:700}
+    .day-pill .day-number{font-size:1.1rem;font-weight:800;margin-top:4px;color:var(--text-main)}
+    .day-pill.active{background:var(--accent-orange);border-color:var(--accent-orange);box-shadow:0 4px 15px rgba(255,102,0,.35)}
+    .day-pill.active .day-name,.day-pill.active .day-number{color:#000}
+    .card{background:var(--card-bg);border-radius:var(--radius);padding:20px;border:1px solid var(--border-color);margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.2)}
+    .card h2{font-size:1.1rem;margin-bottom:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600}
+    .form-group input,.form-group select,.filter-select{width:100%;padding:14px;background:var(--bg-dark);border:1px solid var(--border-color);border-radius:12px;color:#fff;font-size:.95rem;outline:none}
+    .btn-primary{width:100%;padding:16px;background:var(--accent-orange);color:#000;font-weight:800;border:none;border-radius:14px;cursor:pointer;font-size:1rem;box-shadow:0 4px 15px rgba(255,102,0,.35);display:flex;align-items:center;justify-content:center;gap:8px}
+    .class-card,.client-card{background:var(--card-hover);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border-left:4px solid var(--accent-orange);animation:cardAppear .35s ease forwards}
+    @keyframes cardAppear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .class-card.completed{border-left-color:var(--accent-green);opacity:.85;background:rgba(0,210,106,.05)}
+    .class-info h3,.client-info h3{font-size:1rem;margin-bottom:4px;font-weight:700}
+    .class-info p,.client-info p{font-size:.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+    .action-buttons{display:flex;align-items:center;gap:8px}
+    .check-btn{background:rgba(255,255,255,.08);border:1px solid var(--border-color);color:var(--text-main);padding:8px 12px;border-radius:20px;font-size:.75rem;cursor:pointer;font-weight:700}
+    .check-btn.active{background:var(--accent-green);color:#000}
+    .delete-btn{background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.3);color:var(--accent-red);width:32px;height:32px;border-radius:50%;cursor:pointer;display:grid;place-items:center}
+    .income-group{background:var(--card-bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
+    /* NUEVO: ANALÍTICA DE INGRESOS */
+    .chip-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+    .chip-row::-webkit-scrollbar{display:none}
+    .chip{flex-shrink:0;padding:9px 16px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:20px;color:var(--text-muted);font-size:.8rem;font-weight:700;cursor:pointer}
+    .chip.active{background:var(--accent-orange);border-color:var(--accent-orange);color:#000}
+    .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 20px}
+    .kpi{background:linear-gradient(135deg,#1d212a 0%,#15181e 100%);border:1px solid var(--border-color);border-radius:16px;padding:14px}
+    .kpi label{font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+    .kpi b{display:block;font-size:1.15rem;font-weight:800;margin-top:4px}
+    .kpi b.green{color:var(--accent-green)}
+    .kpi b.orange{color:var(--accent-orange)}
+    .insight{background:rgba(255,102,0,.1);border:1px solid rgba(255,102,0,.3);border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:.82rem;line-height:1.45}
+    .insight b{color:var(--accent-orange)}
+    .sub-title{font-size:1.05rem;font-weight:700;margin:22px 0 12px}
+    .client-stat{background:var(--card-bg);border:1px solid var(--border-color);border-radius:16px;padding:14px 16px;margin-bottom:10px}
+    .cs-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .cs-name{font-weight:700;font-size:.95rem}
+    .cs-money{font-weight:800;color:var(--accent-green)}
+    .cs-bar{height:6px;background:var(--bg-dark);border-radius:6px;margin:10px 0;overflow:hidden}
+    .cs-bar div{height:100%;background:var(--accent-orange);border-radius:6px;transition:width .5s ease}
+    .cs-meta{display:flex;justify-content:space-between;font-size:.74rem;color:var(--text-muted);font-weight:600;flex-wrap:wrap;gap:4px}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:grid;place-items:center;z-index:2000;opacity:0;visibility:hidden;transition:all .3s ease}
+    .modal-overlay.active{opacity:1;visibility:visible}
+    .modal-card{background:var(--card-bg);border:1px solid var(--border-color);padding:28px 22px;border-radius:24px;text-align:center;width:85%;max-width:340px}
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(21,24,30,.95);backdrop-filter:blur(16px);border-top:1px solid var(--border-color);display:flex;justify-content:space-around;padding:12px 0;z-index:100}
+    .nav-button{background:none;border:none;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.7rem;font-weight:600;cursor:pointer;width:25%}
+    .nav-button.active{color:var(--accent-orange)}
+    #pwa-install-btn{display:none;background:rgba(255,102,0,.15);color:var(--accent-orange);border:1px solid var(--accent-orange);padding:10px;border-radius:12px;font-weight:700;font-size:.85rem;cursor:pointer;margin-top:15px;width:100%}
   </style>
 </head>
 <body>
-
-  <!-- BANNER INTERNET -->
   <div id="offline-banner">⚠️ Modo Sin Conexión a Internet</div>
 
-  <!-- SPLASH SCREEN -->
   <div id="splash-screen">
     <div class="splash-logo">
-      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-      </svg>
+      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
     </div>
     <div class="splash-title">ClassManager</div>
     <div class="splash-subtitle">Control de Clases e Ingresos</div>
   </div>
 
-  <!-- MODAL DE ÉXITO -->
   <div class="modal-overlay" id="success-modal">
     <div class="modal-card">
-      <h3 style="font-size: 1.2rem; margin-bottom: 6px;">¡Registro Exitoso!</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Guardado correctamente en Firestore.</p>
-      <div style="margin-top: 20px;">
-        <button class="btn-primary" onclick="closeSuccessModal()">Continuar</button>
-      </div>
+      <h3 style="font-size:1.2rem;margin-bottom:6px;">¡Registro Exitoso!</h3>
+      <p style="font-size:.85rem;color:var(--text-muted);">Guardado correctamente en Firestore.</p>
+      <div style="margin-top:20px;"><button class="btn-primary" onclick="closeSuccessModal()">Continuar</button></div>
     </div>
   </div>
 
   <div class="app-viewport">
-    
-    <!-- HEADER -->
     <header>
-      <button class="menu-toggle" id="menu-btn">
-        <span></span><span></span><span></span>
-      </button>
+      <button class="menu-toggle" id="menu-btn"><span></span><span></span><span></span></button>
       <div class="brand-mini">
-        <div class="brand-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-          </svg>
-        </div>
+        <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg></div>
         <div class="brand-title">ClassManager</div>
       </div>
-      <div style="width: 22px;"></div>
+      <div style="width:22px;"></div>
     </header>
 
-    <!-- DRAWER -->
     <div class="drawer-overlay" id="drawer-overlay"></div>
     <aside class="drawer" id="drawer">
       <div class="brand-mini">
-        <div class="brand-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-          </svg>
-        </div>
+        <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path></svg></div>
         <div class="brand-title">ClassManager</div>
       </div>
       <nav class="drawer-nav">
-        <div class="drawer-item active" onclick="switchTab('clases')">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Clases y Agenda
-        </div>
-        <div class="drawer-item" onclick="switchTab('clientes')">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          Clientes y Alumnos
-        </div>
-        <div class="drawer-item" onclick="switchTab('ingresos')">
-          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          Ingresos Mensuales
-        </div>
+        <div class="drawer-item active" onclick="switchTab('clases')"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Clases y Agenda</div>
+        <div class="drawer-item" onclick="switchTab('clientes')"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clientes y Alumnos</div>
+        <div class="drawer-item" onclick="switchTab('ingresos')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Ingresos y Estudio</div>
         <button id="pwa-install-btn">📲 Instalar Aplicación</button>
       </nav>
     </aside>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="content-container">
-
-      <!-- RESUMEN EN TIEMPO REAL -->
       <section class="stats-card">
-        <div class="stat-item">
-          <label>Horas Completadas</label>
-          <span id="total-hours">0h</span>
-        </div>
-        <div class="stat-item">
-          <label>Ingresos Totales</label>
-          <span id="total-earnings">$0</span>
-        </div>
+        <div class="stat-item"><label>Horas Completadas</label><span id="total-hours">0h</span></div>
+        <div class="stat-item"><label>Ingresos Totales</label><span id="total-earnings">$0</span></div>
       </section>
 
-      <!-- TAB 1: CLASES -->
       <section id="tab-clases" class="tab-content active">
-        <!-- CALENDARIO AMPLIADO DE 14 DÍAS -->
         <div class="calendar-strip" id="calendar-strip"></div>
-
         <div class="card">
           <h2>Agendar Nueva Clase</h2>
           <form id="class-form">
-            <div class="form-group">
-              <label>Seleccionar Cliente</label>
-              <select id="select-client" required>
-                <option value="">Cargando clientes...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Fecha y Hora</label>
-              <input type="datetime-local" id="class-date" required />
-            </div>
-            <div class="form-group">
-              <label>Duración (Horas)</label>
-              <input type="number" id="hours-count" step="0.5" value="1" required />
-            </div>
-            <button type="submit" class="btn-primary" id="btn-submit">
-              Agendar en Firestore
-            </button>
+            <div class="form-group"><label>Seleccionar Cliente</label><select id="select-client" required><option value="">Cargando clientes...</option></select></div>
+            <div class="form-group"><label>Fecha y Hora</label><input type="datetime-local" id="class-date" required /></div>
+            <div class="form-group"><label>Duración (Horas)</label><input type="number" id="hours-count" step="0.5" min="0.5" value="1" required /></div>
+            <button type="submit" class="btn-primary">Agendar en Firestore</button>
           </form>
         </div>
-
         <h2>Clases Agendadas</h2>
         <div id="classes-list"></div>
       </section>
 
-      <!-- TAB 2: CLIENTES -->
       <section id="tab-clientes" class="tab-content">
         <div class="card">
           <h2>Registrar Nuevo Cliente</h2>
           <form id="client-form">
-            <div class="form-group">
-              <label>Nombre del Alumno / Cliente</label>
-              <input type="text" id="client-name-input" placeholder="Ej. Camilo" required />
-            </div>
-            <div class="form-group">
-              <label>Precio por Hora ($)</label>
-              <input type="number" id="client-rate-input" value="30000" step="1000" required />
-            </div>
+            <div class="form-group"><label>Nombre del Alumno / Cliente</label><input type="text" id="client-name-input" placeholder="Ej. Camilo" required /></div>
+            <div class="form-group"><label>Precio por Hora ($)</label><input type="number" id="client-rate-input" value="30000" step="1000" required /></div>
             <button type="submit" class="btn-primary">Guardar Cliente</button>
           </form>
         </div>
-
         <h2>Lista de Clientes</h2>
         <div id="clients-list"></div>
       </section>
 
-      <!-- TAB 3: INGRESOS -->
+      <!-- TAB 3: INGRESOS Y ESTUDIO -->
       <section id="tab-ingresos" class="tab-content">
-        <h2>Ingresos por Fecha</h2>
+        <h2 style="margin-bottom:12px;">Estudio de Ingresos</h2>
+        <div class="chip-row" id="period-chips">
+          <div class="chip" data-p="hoy">Hoy</div>
+          <div class="chip" data-p="semana">7 días</div>
+          <div class="chip active" data-p="mes">Este mes</div>
+          <div class="chip" data-p="mesant">Mes anterior</div>
+          <div class="chip" data-p="todo">Todo</div>
+        </div>
+        <select class="filter-select" id="income-client-filter"><option value="">Todos los clientes</option></select>
+
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div id="insights"></div>
+
+        <div class="sub-title">Rendimiento por Cliente</div>
+        <div id="client-stats"></div>
+
+        <div class="sub-title">Ingresos por Fecha</div>
         <div id="income-breakdown"></div>
       </section>
-
     </main>
 
-    <!-- NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
-      <button class="nav-button active" id="nav-clases" onclick="switchTab('clases')">
-        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <span>Clases</span>
-      </button>
-      <button class="nav-button" id="nav-clientes" onclick="switchTab('clientes')">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-        <span>Clientes</span>
-      </button>
-      <button class="nav-button" id="nav-ingresos" onclick="switchTab('ingresos')">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-        <span>Ingresos</span>
-      </button>
+      <button class="nav-button active" id="nav-clases" onclick="switchTab('clases')"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span>Clases</span></button>
+      <button class="nav-button" id="nav-clientes" onclick="switchTab('clientes')"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg><span>Clientes</span></button>
+      <button class="nav-button" id="nav-ingresos" onclick="switchTab('ingresos')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg><span>Ingresos</span></button>
     </nav>
-
   </div>
 
-  <!-- LÓGICA Y FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-      getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBWUHXgcCSrWtqUKGXk9pwxu3Ui8e92-kk",
@@ -738,126 +224,78 @@
     const clasesRef = collection(db, "clases");
     const clientesRef = collection(db, "clientes");
 
-    let currentClasses = [];
-    let currentClients = [];
+    let currentClasses = [], currentClients = [];
     let selectedDateFilter = null;
+    let incPeriod = 'mes', incClient = '';
 
-    // DETECCIÓN DE ESTADO DE CONEXIÓN A INTERNET
-    function updateOnlineStatus() {
-      const banner = document.getElementById('offline-banner');
-      if (!navigator.onLine) {
-        banner.style.display = 'block';
-      } else {
-        banner.style.display = 'none';
-      }
-    }
+    // ---------- Utilidades ----------
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const money = (n) => '$' + Math.round(n).toLocaleString('es-CO');
+    const fmtH = (h) => { const m = Math.round(h * 60); const hh = Math.floor(m / 60), mm = m % 60; return mm ? `${hh}h ${mm}m` : `${hh}h`; };
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const dayOf = (c) => c.classDate ? c.classDate.split('T')[0] : '';
+
+    function updateOnlineStatus() { document.getElementById('offline-banner').style.display = navigator.onLine ? 'none' : 'block'; }
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 
     window.addEventListener('load', () => {
       updateOnlineStatus();
-      buildCalendarStrip(14); // Genera 14 días en el calendario
-      setTimeout(() => { document.getElementById('splash-screen').classList.add('hidden'); }, 2000);
-      
-      // REGISTRAR SERVICE WORKER PARA LA PWA
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
-      }
+      buildCalendarStrip(14);
+      setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 2000);
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
     });
 
-    // CONSTRUIR CALENDARIO Y AGREGAR FECHA AL FORMULARIO AL SELECCIONAR DÍA
+    // ---------- Calendario ----------
     function buildCalendarStrip(daysToShow = 14) {
       const strip = document.getElementById('calendar-strip');
       strip.innerHTML = '';
-      
       const todayObj = new Date();
-      const year = todayObj.getFullYear();
-      const month = String(todayObj.getMonth() + 1).padStart(2, '0');
-      const dayNum = String(todayObj.getDate()).padStart(2, '0');
-      const todayISO = `${year}-${month}-${dayNum}`;
-
-      selectedDateFilter = todayISO;
-      updateFormDateInput(todayISO, "08:00");
+      selectedDateFilter = iso(todayObj);
+      updateFormDateInput(selectedDateFilter, "08:00");
 
       const allPill = document.createElement('div');
-      allPill.className = `day-pill`;
+      allPill.className = 'day-pill';
       allPill.innerHTML = `<div class="day-name">TODOS</div><div class="day-number">∞</div>`;
-      allPill.onclick = () => {
-        selectedDateFilter = null;
-        updateActiveCalendarPill(allPill);
-        renderApp();
-      };
+      allPill.onclick = () => { selectedDateFilter = null; updateActiveCalendarPill(allPill); renderApp(); };
       strip.appendChild(allPill);
 
       for (let i = 0; i < daysToShow; i++) {
-        const date = new Date();
-        date.setDate(todayObj.getDate() + i);
-
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        const isoDate = `${y}-${m}-${d}`;
-
+        const date = new Date(); date.setDate(todayObj.getDate() + i);
+        const isoDate = iso(date);
         const dayName = date.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', '');
-
         const pill = document.createElement('div');
         pill.className = `day-pill ${selectedDateFilter === isoDate ? 'active' : ''}`;
-        pill.innerHTML = `
-          <div class="day-name">${dayName}</div>
-          <div class="day-number">${date.getDate()}</div>
-        `;
-        pill.onclick = () => {
-          selectedDateFilter = isoDate;
-          updateActiveCalendarPill(pill);
-          updateFormDateInput(isoDate); // Agrega directamente la fecha al input del formulario
-          renderApp();
-        };
+        pill.innerHTML = `<div class="day-name">${dayName}</div><div class="day-number">${date.getDate()}</div>`;
+        pill.onclick = () => { selectedDateFilter = isoDate; updateActiveCalendarPill(pill); updateFormDateInput(isoDate); renderApp(); };
         strip.appendChild(pill);
       }
     }
-
-    function updateActiveCalendarPill(targetPill) {
-      document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
-      targetPill.classList.add('active');
-    }
-
+    function updateActiveCalendarPill(p) { document.querySelectorAll('.day-pill').forEach(x => x.classList.remove('active')); p.classList.add('active'); }
     function updateFormDateInput(isoDate, defaultTime = null) {
-      const dateInput = document.getElementById('class-date');
-      if (!dateInput) return;
-
-      let currentTime = defaultTime || "08:00";
-      if (dateInput.value && dateInput.value.includes('T')) {
-        currentTime = dateInput.value.split('T')[1];
-      }
-
-      dateInput.value = `${isoDate}T${currentTime}`;
+      const input = document.getElementById('class-date'); if (!input) return;
+      let t = defaultTime || "08:00";
+      if (input.value && input.value.includes('T')) t = input.value.split('T')[1];
+      input.value = `${isoDate}T${t}`;
     }
 
-    // OBTENER CLIENTES DESDE FIRESTORE
+    // ---------- Firestore ----------
     onSnapshot(clientesRef, (snapshot) => {
       currentClients = [];
-      snapshot.forEach((docSnap) => {
-        currentClients.push({ id: docSnap.id, ...docSnap.data() });
-      });
-      renderClients();
+      snapshot.forEach(d => currentClients.push({ id: d.id, ...d.data() }));
+      currentClients.sort((a, b) => a.name.localeCompare(b.name));
+      renderClients(); renderIncome();
     });
-
-    // OBTENER CLASES DESDE FIRESTORE
-    const qClases = query(clasesRef, orderBy("classDate", "desc"));
-    onSnapshot(qClases, (snapshot) => {
+    onSnapshot(query(clasesRef, orderBy("classDate", "desc")), (snapshot) => {
       currentClasses = [];
-      snapshot.forEach((docSnap) => {
-        currentClasses.push({ id: docSnap.id, ...docSnap.data() });
-      });
+      snapshot.forEach(d => currentClasses.push({ id: d.id, ...d.data() }));
       renderApp();
     });
 
-    // REGISTRAR NUEVO CLIENTE
     document.getElementById('client-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById('client-name-input').value;
+      const name = document.getElementById('client-name-input').value.trim();
       const rate = parseFloat(document.getElementById('client-rate-input').value);
-
       try {
         await addDoc(clientesRef, { name, rate, createdAt: new Date().toISOString() });
         document.getElementById('client-form').reset();
@@ -865,153 +303,198 @@
       } catch (err) { console.error(err); }
     });
 
-    // AGENDAR CLASE VINCULADA AL CLIENTE
     document.getElementById('class-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const clientId = document.getElementById('select-client').value;
       const date = document.getElementById('class-date').value;
       const hours = parseFloat(document.getElementById('hours-count').value);
-
       const client = currentClients.find(c => c.id === clientId);
       if (!client) return;
-
       try {
-        await addDoc(clasesRef, {
-          clientId: client.id,
-          clienteName: client.name,
-          hourlyRate: client.rate,
-          classDate: date,
-          hours: hours,
-          completed: false,
-          createdAt: new Date().toISOString()
-        });
+        await addDoc(clasesRef, { clientId: client.id, clienteName: client.name, hourlyRate: client.rate, classDate: date, hours, completed: false, createdAt: new Date().toISOString() });
         document.getElementById('class-form').reset();
+        updateFormDateInput(date.split('T')[0], date.split('T')[1]); // conserva la fecha elegida
         showSuccessModal();
       } catch (err) { console.error(err); }
     });
 
-    window.toggleCheck = async (id, status) => {
-      await updateDoc(doc(db, "clases", id), { completed: !status });
-    };
+    window.toggleCheck = async (id, status) => { await updateDoc(doc(db, "clases", id), { completed: !status }); };
+    window.deleteClass = async (id) => { if (confirm('¿Eliminar esta clase?')) await deleteDoc(doc(db, "clases", id)); };
+    window.deleteClient = async (id) => { if (confirm('¿Eliminar este cliente? Sus clases anteriores se conservan.')) await deleteDoc(doc(db, "clientes", id)); };
 
-    window.deleteClass = async (id) => {
-      await deleteDoc(doc(db, "clases", id));
-    };
-
-    window.deleteClient = async (id) => {
-      await deleteDoc(doc(db, "clientes", id));
-    };
-
+    // ---------- Render clientes ----------
     function renderClients() {
       const select = document.getElementById('select-client');
+      const filter = document.getElementById('income-client-filter');
       const list = document.getElementById('clients-list');
+      const prevSel = select.value;
       select.innerHTML = '<option value="">Seleccione un cliente...</option>';
-      list.innerHTML = '';
-
-      if (currentClients.length === 0) {
-        list.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No hay clientes registrados.</p>';
-      }
+      filter.innerHTML = '<option value="">Todos los clientes</option>';
+      list.innerHTML = currentClients.length ? '' : '<p style="color:var(--text-muted);text-align:center;">No hay clientes registrados.</p>';
 
       currentClients.forEach(c => {
-        select.innerHTML += `<option value="${c.id}">${c.name} ($${c.rate.toLocaleString()}/h)</option>`;
-
+        select.innerHTML += `<option value="${esc(c.id)}">${esc(c.name)} (${money(c.rate)}/h)</option>`;
+        filter.innerHTML += `<option value="${esc(c.id)}">${esc(c.name)}</option>`;
         const item = document.createElement('div');
         item.className = 'client-card';
         item.innerHTML = `
-          <div class="client-info">
-            <h3>${c.name}</h3>
-            <p>Tarifa: $${c.rate.toLocaleString()} / hora</p>
-          </div>
-          <button class="delete-btn" onclick="deleteClient('${c.id}')">✕</button>
-        `;
+          <div class="client-info"><h3>${esc(c.name)}</h3><p>Tarifa: ${money(c.rate)} / hora</p></div>
+          <button class="delete-btn" onclick="deleteClient('${esc(c.id)}')">✕</button>`;
         list.appendChild(item);
       });
+      select.value = prevSel;
+      filter.value = incClient;
     }
 
+    // ---------- Render clases ----------
     function renderApp() {
       const container = document.getElementById('classes-list');
-      const incomeContainer = document.getElementById('income-breakdown');
       container.innerHTML = '';
-      incomeContainer.innerHTML = '';
+      let totalHours = 0, totalEarnings = 0;
+      currentClasses.forEach(i => { if (i.completed) { totalHours += i.hours; totalEarnings += i.hours * i.hourlyRate; } });
 
-      let totalHours = 0;
-      let totalEarnings = 0;
-      const dateGroup = {};
+      const filtered = selectedDateFilter ? currentClasses.filter(i => dayOf(i) === selectedDateFilter) : currentClasses;
+      if (!filtered.length) container.innerHTML = `<p style="color:var(--text-muted);font-size:.85rem;text-align:center;padding:20px 0;">Sin clases para la fecha seleccionada.</p>`;
 
-      let filteredClasses = currentClasses;
-      if (selectedDateFilter) {
-        filteredClasses = currentClasses.filter(item => item.classDate && item.classDate.split('T')[0] === selectedDateFilter);
-      }
-
-      if (filteredClasses.length === 0) {
-        container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px 0;">Sin clases para la fecha seleccionada.</p>`;
-      }
-
-      currentClasses.forEach((item) => {
-        const cost = item.hours * item.hourlyRate;
-        if (item.completed) {
-          totalHours += item.hours;
-          totalEarnings += cost;
-          const dayKey = item.classDate ? item.classDate.split('T')[0] : 'Sin fecha';
-          dateGroup[dayKey] = (dateGroup[dayKey] || 0) + cost;
-        }
-      });
-
-      filteredClasses.forEach((item) => {
+      filtered.forEach(item => {
         const cost = item.hours * item.hourlyRate;
         const card = document.createElement('div');
         card.className = `class-card ${item.completed ? 'completed' : ''}`;
-        
-        const dateObj = new Date(item.classDate);
-        const dateStr = dateObj.toLocaleDateString('es-CO', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
+        const dateStr = new Date(item.classDate).toLocaleDateString('es-CO', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         card.innerHTML = `
-          <div class="class-info">
-            <h3>${item.clienteName}</h3>
-            <p>${dateStr} - ${item.hours}h x $${item.hourlyRate.toLocaleString()}</p>
-          </div>
+          <div class="class-info"><h3>${esc(item.clienteName)}</h3><p>${dateStr} - ${item.hours}h x ${money(item.hourlyRate)}</p></div>
           <div class="action-buttons">
-            <span style="font-weight:800; color:var(--accent-green);">$${cost.toLocaleString()}</span>
-            <button class="check-btn ${item.completed ? 'active' : ''}" onclick="toggleCheck('${item.id}', ${item.completed})">${item.completed ? 'Lista' : 'Check'}</button>
-            <button class="delete-btn" onclick="deleteClass('${item.id}')">✕</button>
-          </div>
-        `;
+            <span style="font-weight:800;color:var(--accent-green);">${money(cost)}</span>
+            <button class="check-btn ${item.completed ? 'active' : ''}" onclick="toggleCheck('${esc(item.id)}', ${!!item.completed})">${item.completed ? 'Lista' : 'Check'}</button>
+            <button class="delete-btn" onclick="deleteClass('${esc(item.id)}')">✕</button>
+          </div>`;
         container.appendChild(card);
       });
 
-      // Renderizar Ingresos
-      const sortedDates = Object.keys(dateGroup).sort().reverse();
-      if (sortedDates.length === 0) {
-        incomeContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">Sin ingresos registrados.</p>';
-      } else {
-        sortedDates.forEach((day) => {
-          const row = document.createElement('div');
-          row.className = 'income-group';
-          row.innerHTML = `
-            <div>
-              <div style="font-weight: 700; font-size: 0.95rem;">${day}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Total cobrado</div>
-            </div>
-            <div style="font-weight: 800; color: var(--accent-green); font-size: 1.1rem;">
-              +$${dateGroup[day].toLocaleString()}
-            </div>
-          `;
-          incomeContainer.appendChild(row);
-        });
-      }
-
-      document.getElementById('total-hours').innerText = `${totalHours}h`;
-      document.getElementById('total-earnings').innerText = `$${totalEarnings.toLocaleString()}`;
+      document.getElementById('total-hours').innerText = fmtH(totalHours);
+      document.getElementById('total-earnings').innerText = money(totalEarnings);
+      renderIncome();
     }
 
+    // ---------- ESTUDIO DE INGRESOS ----------
+    function inPeriod(c, p) {
+      const d = dayOf(c); if (!d) return p === 'todo';
+      const now = new Date(), today = iso(now);
+      if (p === 'todo') return true;
+      if (p === 'hoy') return d === today;
+      if (p === 'semana') { const s = new Date(); s.setDate(now.getDate() - 6); return d >= iso(s) && d <= today; }
+      if (p === 'mes') return d.slice(0, 7) === today.slice(0, 7);
+      if (p === 'mesant') { const pm = new Date(now.getFullYear(), now.getMonth() - 1, 1); return d.slice(0, 7) === iso(pm).slice(0, 7); }
+      return true;
+    }
+
+    function renderIncome() {
+      const kpi = document.getElementById('kpi-grid');
+      if (!kpi) return;
+      const base = currentClasses.filter(c => !incClient || c.clientId === incClient);
+      const scope = base.filter(c => inPeriod(c, incPeriod));
+      const done = scope.filter(c => c.completed);
+      const pend = scope.filter(c => !c.completed);
+      const cost = (c) => c.hours * c.hourlyRate;
+      const income = done.reduce((s, c) => s + cost(c), 0);
+      const hours = done.reduce((s, c) => s + c.hours, 0);
+      const pendMoney = pend.reduce((s, c) => s + cost(c), 0);
+      const pendHours = pend.reduce((s, c) => s + c.hours, 0);
+
+      kpi.innerHTML = `
+        <div class="kpi"><label>Ingresos</label><b class="green">${money(income)}</b></div>
+        <div class="kpi"><label>Tiempo dictado</label><b>${fmtH(hours)}</b></div>
+        <div class="kpi"><label>Clases hechas</label><b>${done.length}</b></div>
+        <div class="kpi"><label>Promedio / hora</label><b class="orange">${hours ? money(income / hours) : '$0'}</b></div>
+        <div class="kpi"><label>Por cobrar (agendado)</label><b>${money(pendMoney)}</b></div>
+        <div class="kpi"><label>Horas pendientes</label><b>${fmtH(pendHours)}</b></div>`;
+
+      // Agrupar por cliente
+      const byClient = {};
+      done.forEach(c => {
+        const k = c.clientId || c.clienteName;
+        const o = byClient[k] || (byClient[k] = { name: c.clienteName, income: 0, hours: 0, count: 0, last: '' });
+        o.income += cost(c); o.hours += c.hours; o.count++;
+        if (dayOf(c) > o.last) o.last = dayOf(c);
+      });
+      const rows = Object.values(byClient).sort((a, b) => b.income - a.income);
+
+      // Agrupar por día y día de semana
+      const byDay = {}, byWeekday = {};
+      done.forEach(c => {
+        const d = dayOf(c) || 'Sin fecha';
+        byDay[d] = (byDay[d] || 0) + cost(c);
+        if (dayOf(c)) { const w = new Date(dayOf(c) + 'T00:00').getDay(); byWeekday[w] = (byWeekday[w] || 0) + cost(c); }
+      });
+
+      // Insights inteligentes
+      const ins = [];
+      if (rows.length) {
+        const t = rows[0];
+        ins.push(`🏆 <b>${esc(t.name)}</b> es tu mejor cliente: ${money(t.income)} (${income ? Math.round(t.income / income * 100) : 0}% del total) en ${fmtH(t.hours)}.`);
+        const eff = rows.filter(r => r.hours > 0).sort((a, b) => (b.income / b.hours) - (a.income / a.hours))[0];
+        if (rows.length > 1 && eff) ins.push(`⚡ Mejor tarifa efectiva: <b>${esc(eff.name)}</b> con ${money(eff.income / eff.hours)}/h.`);
+      }
+      const wdKeys = Object.keys(byWeekday);
+      if (wdKeys.length) {
+        const best = wdKeys.sort((a, b) => byWeekday[b] - byWeekday[a])[0];
+        const names = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        ins.push(`📅 Tu día más rentable es el <b>${names[best]}</b> (${money(byWeekday[best])}).`);
+      }
+      if (incPeriod === 'mes') {
+        const prevIncome = base.filter(c => c.completed && inPeriod(c, 'mesant')).reduce((s, c) => s + cost(c), 0);
+        if (prevIncome > 0) {
+          const diff = Math.round((income - prevIncome) / prevIncome * 100);
+          ins.push(`${diff >= 0 ? '📈' : '📉'} Vs. mes anterior (${money(prevIncome)}): <b>${diff >= 0 ? '+' : ''}${diff}%</b>.`);
+        }
+        const pm = income + pendMoney;
+        if (pendMoney > 0) ins.push(`🔮 Si completas lo agendado, cerrarás el mes en <b>${money(pm)}</b>.`);
+      }
+      document.getElementById('insights').innerHTML = ins.map(t => `<div class="insight">${t}</div>`).join('');
+
+      // Ranking por cliente
+      const cs = document.getElementById('client-stats');
+      cs.innerHTML = rows.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;text-align:center;">Sin clases completadas en este período.</p>';
+      const max = rows.length ? rows[0].income : 1;
+      rows.forEach((r, i) => {
+        const el = document.createElement('div');
+        el.className = 'client-stat';
+        el.innerHTML = `
+          <div class="cs-top"><span class="cs-name">${i + 1}. ${esc(r.name)}</span><span class="cs-money">${money(r.income)}</span></div>
+          <div class="cs-bar"><div style="width:${Math.max(4, r.income / max * 100)}%"></div></div>
+          <div class="cs-meta"><span>⏱ ${fmtH(r.hours)}</span><span>${r.count} clase${r.count === 1 ? '' : 's'}</span><span>${money(r.income / r.count)}/clase</span><span>Última: ${esc(r.last)}</span></div>`;
+        cs.appendChild(el);
+      });
+
+      // Desglose por fecha
+      const ib = document.getElementById('income-breakdown');
+      const days = Object.keys(byDay).sort().reverse();
+      ib.innerHTML = days.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;text-align:center;">Sin ingresos registrados.</p>';
+      days.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'income-group';
+        row.innerHTML = `<div><div style="font-weight:700;font-size:.95rem;">${esc(d)}</div><div style="font-size:.75rem;color:var(--text-muted);">Total cobrado</div></div>
+          <div style="font-weight:800;color:var(--accent-green);font-size:1.1rem;">+${money(byDay[d])}</div>`;
+        ib.appendChild(row);
+      });
+    }
+
+    document.getElementById('period-chips').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip'); if (!chip) return;
+      incPeriod = chip.dataset.p;
+      document.querySelectorAll('#period-chips .chip').forEach(c => c.classList.toggle('active', c === chip));
+      renderIncome();
+    });
+    document.getElementById('income-client-filter').addEventListener('change', (e) => { incClient = e.target.value; renderIncome(); });
+
+    // ---------- UI general ----------
     function showSuccessModal() { document.getElementById('success-modal').classList.add('active'); }
-    window.closeSuccessModal = () => { document.getElementById('success-modal').classList.remove('active'); };
+    window.closeSuccessModal = () => document.getElementById('success-modal').classList.remove('active');
 
     window.switchTab = (tabName) => {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-button').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-
       document.getElementById(`tab-${tabName}`).classList.add('active');
       document.getElementById(`nav-${tabName}`)?.classList.add('active');
       closeDrawer();
@@ -1020,35 +503,15 @@
     const menuBtn = document.getElementById('menu-btn');
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('drawer-overlay');
-
-    menuBtn.addEventListener('click', () => {
-      drawer.classList.add('active');
-      overlay.classList.add('active');
-    });
-
+    menuBtn.addEventListener('click', () => { drawer.classList.add('active'); overlay.classList.add('active'); });
     overlay.addEventListener('click', closeDrawer);
-    function closeDrawer() {
-      drawer.classList.remove('active');
-      overlay.classList.remove('active');
-    }
+    function closeDrawer() { drawer.classList.remove('active'); overlay.classList.remove('active'); }
 
-    // BOTÓN DE INSTALACIÓN PWA
     let deferredPrompt;
     const installBtn = document.getElementById('pwa-install-btn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.style.display = 'block';
-    });
-
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'block'; });
     installBtn.addEventListener('click', () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          installBtn.style.display = 'none';
-        });
-      }
+      if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { installBtn.style.display = 'none'; }); }
     });
   </script>
 </body>
