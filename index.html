@@ -89,6 +89,35 @@
     .cs-bar{height:6px;background:var(--bg-dark);border-radius:6px;margin:10px 0;overflow:hidden}
     .cs-bar div{height:100%;background:var(--accent-orange);border-radius:6px;transition:width .5s ease}
     .cs-meta{display:flex;justify-content:space-between;font-size:.74rem;color:var(--text-muted);font-weight:600;flex-wrap:wrap;gap:4px}
+    .day-pill.today:not(.active){border-color:var(--accent-orange)}
+    #month-label{font-weight:800;font-size:1rem;margin-bottom:10px;text-transform:capitalize}
+    .repeat-hint{font-size:.75rem;color:var(--text-muted);margin:-4px 0 14px}
+    .sched-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .sched-nav{width:38px;height:38px;border-radius:50%;background:var(--card-bg);border:1px solid var(--border-color);color:var(--text-main);font-size:1.2rem;cursor:pointer}
+    #sched-title{text-transform:capitalize;margin:0}
+    .sched-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+    .sg-head{text-align:center;font-size:.7rem;font-weight:700;color:var(--text-muted);padding:4px 0}
+    .sg-cell{background:var(--card-bg);border:1px solid var(--border-color);border-radius:10px;min-height:70px;padding:5px 3px 6px;cursor:pointer;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+    .sg-cell.empty{background:none;border:none;cursor:default}
+    .sg-cell.today{border-color:var(--accent-orange)}
+    .sg-cell.sel{background:rgba(255,102,0,.15);border-color:var(--accent-orange)}
+    .sg-num{font-size:.75rem;font-weight:800;text-align:center}
+    .sg-ev{font-size:.56rem;font-weight:700;text-align:center;background:rgba(255,102,0,.2);color:var(--accent-orange);border-radius:4px;padding:1px 0;white-space:nowrap}
+    .sg-ev.done{background:rgba(0,210,106,.18);color:var(--accent-green)}
+    .sg-more{font-size:.56rem;color:var(--text-muted);text-align:center}
+    .sg-load{margin-top:auto;height:3px;background:var(--bg-dark);border-radius:3px;overflow:hidden}
+    .sg-load div{height:100%;background:var(--accent-orange)}
+    .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.72rem;color:var(--text-muted);font-weight:600;margin-bottom:18px}
+    .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+    .tl{position:relative;height:16px;background:var(--bg-dark);border-radius:8px;overflow:hidden;margin:12px 0 4px}
+    .tl i{position:absolute;top:0;bottom:0}
+    .tl i.free{background:rgba(0,210,106,.35)}
+    .tl i.busy{background:var(--accent-orange)}
+    .tl-scale{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);font-weight:600;margin-bottom:14px}
+    .slot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;margin-bottom:8px;font-size:.82rem;font-weight:600}
+    .slot.busy{background:rgba(255,102,0,.12);border-left:3px solid var(--accent-orange)}
+    .slot.free{background:rgba(0,210,106,.08);border-left:3px solid var(--accent-green)}
+    .slot small{color:var(--text-muted);font-weight:600}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:grid;place-items:center;z-index:2000;opacity:0;visibility:hidden;transition:all .3s ease}
     .modal-overlay.active{opacity:1;visibility:visible}
     .modal-card{background:var(--card-bg);border:1px solid var(--border-color);padding:28px 22px;border-radius:24px;text-align:center;width:85%;max-width:340px}
@@ -137,6 +166,7 @@
         <div class="drawer-item active" onclick="switchTab('clases')"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Clases y Agenda</div>
         <div class="drawer-item" onclick="switchTab('clientes')"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clientes y Alumnos</div>
         <div class="drawer-item" onclick="switchTab('ingresos')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Ingresos y Estudio</div>
+        <div class="drawer-item" onclick="switchTab('horario')"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Horario</div>
         <button id="pwa-install-btn">📲 Instalar Aplicación</button>
       </nav>
     </aside>
@@ -148,6 +178,7 @@
       </section>
 
       <section id="tab-clases" class="tab-content active">
+        <div id="month-label"></div>
         <div class="calendar-strip" id="calendar-strip"></div>
         <div class="card">
           <h2>Agendar Nueva Clase</h2>
@@ -155,6 +186,15 @@
             <div class="form-group"><label>Seleccionar Cliente</label><select id="select-client" required><option value="">Cargando clientes...</option></select></div>
             <div class="form-group"><label>Fecha y Hora</label><input type="datetime-local" id="class-date" required /></div>
             <div class="form-group"><label>Duración (Horas)</label><input type="number" id="hours-count" step="0.5" min="0.5" value="1" required /></div>
+            <div class="form-group"><label>Repetir clase</label>
+              <div class="chip-row" id="repeat-chips" style="margin-bottom:0">
+                <div class="chip active" data-r="none">No repetir</div>
+                <div class="chip" data-r="month">Resto del mes</div>
+                <div class="chip" data-r="custom">Personalizado</div>
+              </div>
+            </div>
+            <div class="form-group" id="repeat-custom" style="display:none"><label>¿Cuántas veces más se repite? (una por semana)</label><input type="number" id="repeat-count" min="1" max="52" value="4" /></div>
+            <div class="repeat-hint" id="repeat-hint"></div>
             <button type="submit" class="btn-primary">Agendar en Firestore</button>
           </form>
         </div>
@@ -196,12 +236,23 @@
         <div class="sub-title">Ingresos por Fecha</div>
         <div id="income-breakdown"></div>
       </section>
+      <section id="tab-horario" class="tab-content">
+        <div class="sched-head">
+          <button class="sched-nav" id="sched-prev">‹</button>
+          <div style="text-align:center"><h2 id="sched-title"></h2><div style="font-size:.72rem;color:var(--text-muted);font-weight:600;">Disponibilidad de 6:00 a 22:00</div></div>
+          <button class="sched-nav" id="sched-next">›</button>
+        </div>
+        <div class="sched-grid" id="sched-grid"></div>
+        <div class="legend"><span><i style="background:var(--accent-orange)"></i>Pendiente</span><span><i style="background:var(--accent-green)"></i>Completada</span><span>Barra inferior = ocupación del día</span></div>
+        <div class="card" id="day-detail"></div>
+      </section>
     </main>
 
     <nav class="bottom-nav">
       <button class="nav-button active" id="nav-clases" onclick="switchTab('clases')"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span>Clases</span></button>
       <button class="nav-button" id="nav-clientes" onclick="switchTab('clientes')"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg><span>Clientes</span></button>
       <button class="nav-button" id="nav-ingresos" onclick="switchTab('ingresos')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg><span>Ingresos</span></button>
+      <button class="nav-button" id="nav-horario" onclick="switchTab('horario')"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Horario</span></button>
     </nav>
   </div>
 
@@ -241,35 +292,44 @@
 
     window.addEventListener('load', () => {
       updateOnlineStatus();
-      buildCalendarStrip(14);
+      buildCalendarStrip(true); initSchedule();
       setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 2000);
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
     });
 
-    // ---------- Calendario ----------
-    function buildCalendarStrip(daysToShow = 14) {
+    // ---------- Calendario (mes completo, sincronizado con el teléfono) ----------
+    const pad = n => String(n).padStart(2, '0');
+    const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const DAY_START = 6 * 60, DAY_END = 22 * 60;
+    let liveDay = iso(new Date());
+    let schedMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let schedDay = liveDay, repeatMode = 'none';
+
+    function buildCalendarStrip(reset = true) {
       const strip = document.getElementById('calendar-strip');
       strip.innerHTML = '';
-      const todayObj = new Date();
-      selectedDateFilter = iso(todayObj);
-      updateFormDateInput(selectedDateFilter, "08:00");
+      const now = new Date(), y = now.getFullYear(), m = now.getMonth(), todayISO = iso(now);
+      document.getElementById('month-label').textContent = now.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+      if (reset) { selectedDateFilter = todayISO; updateFormDateInput(todayISO, "08:00"); }
 
       const allPill = document.createElement('div');
-      allPill.className = 'day-pill';
+      allPill.className = 'day-pill' + (selectedDateFilter === null ? ' active' : '');
       allPill.innerHTML = `<div class="day-name">TODOS</div><div class="day-number">∞</div>`;
       allPill.onclick = () => { selectedDateFilter = null; updateActiveCalendarPill(allPill); renderApp(); };
       strip.appendChild(allPill);
 
-      for (let i = 0; i < daysToShow; i++) {
-        const date = new Date(); date.setDate(todayObj.getDate() + i);
-        const isoDate = iso(date);
-        const dayName = date.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', '');
+      const last = new Date(y, m + 1, 0).getDate();
+      for (let d = 1; d <= last; d++) {
+        const date = new Date(y, m, d), isoDate = iso(date);
         const pill = document.createElement('div');
-        pill.className = `day-pill ${selectedDateFilter === isoDate ? 'active' : ''}`;
-        pill.innerHTML = `<div class="day-name">${dayName}</div><div class="day-number">${date.getDate()}</div>`;
+        pill.dataset.d = isoDate;
+        pill.className = `day-pill ${selectedDateFilter === isoDate ? 'active' : ''} ${isoDate === todayISO ? 'today' : ''}`;
+        pill.innerHTML = `<div class="day-name">${date.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', '')}</div><div class="day-number">${d}</div>`;
         pill.onclick = () => { selectedDateFilter = isoDate; updateActiveCalendarPill(pill); updateFormDateInput(isoDate); renderApp(); };
         strip.appendChild(pill);
       }
+      const act = strip.querySelector('.day-pill.active');
+      if (act) strip.scrollLeft = act.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft - strip.clientWidth / 2 + act.clientWidth / 2;
     }
     function updateActiveCalendarPill(p) { document.querySelectorAll('.day-pill').forEach(x => x.classList.remove('active')); p.classList.add('active'); }
     function updateFormDateInput(isoDate, defaultTime = null) {
@@ -277,6 +337,117 @@
       let t = defaultTime || "08:00";
       if (input.value && input.value.includes('T')) t = input.value.split('T')[1];
       input.value = `${isoDate}T${t}`;
+      updateRepeatHint();
+    }
+    function syncClock() {
+      const t = iso(new Date()); if (t === liveDay) return;
+      const monthChanged = t.slice(0, 7) !== liveDay.slice(0, 7);
+      liveDay = t; buildCalendarStrip(true);
+      if (monthChanged || schedDay === t) schedMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      schedDay = t; renderApp();
+    }
+
+    // ---------- Repetición y choques de horario ----------
+    const toMin = dt => { const [h, m] = (dt.split('T')[1] || '00:00').split(':').map(Number); return h * 60 + m; };
+    function conflictsFor(dt, hours) {
+      const day = dt.split('T')[0], s = toMin(dt), e = s + hours * 60;
+      return currentClasses.filter(c => dayOf(c) === day && toMin(c.classDate) < e && s < toMin(c.classDate) + c.hours * 60);
+    }
+    function buildDates(dt) {
+      const [d, t] = dt.split('T'), [y, m, dd] = d.split('-').map(Number);
+      const mk = i => `${iso(new Date(y, m - 1, dd + 7 * i))}T${t}`;
+      const out = [dt];
+      if (repeatMode === 'month') { for (let i = 1; new Date(y, m - 1, dd + 7 * i).getMonth() === m - 1; i++) out.push(mk(i)); }
+      else if (repeatMode === 'custom') { const n = Math.max(1, Math.min(52, parseInt(document.getElementById('repeat-count').value) || 1)); for (let i = 1; i <= n; i++) out.push(mk(i)); }
+      return out;
+    }
+    function updateRepeatHint() {
+      const el = document.getElementById('repeat-hint'), d = document.getElementById('class-date')?.value;
+      if (!el) return;
+      el.textContent = (repeatMode === 'none' || !d) ? '' : `Se agendarán ${buildDates(d).length} clases (una por semana, mismo día y hora).`;
+    }
+    function setRepeat(mode) {
+      repeatMode = mode;
+      document.querySelectorAll('#repeat-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.r === mode));
+      document.getElementById('repeat-custom').style.display = mode === 'custom' ? 'block' : 'none';
+      updateRepeatHint();
+    }
+    document.getElementById('repeat-chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) setRepeat(c.dataset.r); });
+    document.getElementById('repeat-count').addEventListener('input', updateRepeatHint);
+    document.getElementById('class-date').addEventListener('input', updateRepeatHint);
+
+    // ---------- HORARIO ----------
+    const hh = m => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+    const hs = m => `${Math.floor(m / 60)}${m % 60 ? ':' + pad(m % 60) : ''}`;
+    function dayClasses(day) {
+      return currentClasses.filter(c => dayOf(c) === day).map(c => ({ c, s: toMin(c.classDate), e: toMin(c.classDate) + c.hours * 60 })).sort((a, b) => a.s - b.s);
+    }
+    function busyMerged(list) {
+      const out = [];
+      list.forEach(x => { const l = out[out.length - 1]; if (l && x.s <= l.e) l.e = Math.max(l.e, x.e); else out.push({ s: x.s, e: x.e }); });
+      return out;
+    }
+    function freeSlots(list) {
+      let cur = DAY_START; const out = [];
+      busyMerged(list).forEach(b => { if (b.s > cur) out.push({ s: cur, e: Math.min(b.s, DAY_END) }); cur = Math.max(cur, b.e); });
+      if (cur < DAY_END) out.push({ s: cur, e: DAY_END });
+      return out.filter(f => f.e > f.s);
+    }
+    function renderSchedule() {
+      const grid = document.getElementById('sched-grid'); if (!grid) return;
+      const y = schedMonth.getFullYear(), m = schedMonth.getMonth();
+      document.getElementById('sched-title').textContent = `${MESES[m]} ${y}`;
+      const offset = (new Date(y, m, 1).getDay() + 6) % 7, last = new Date(y, m + 1, 0).getDate(), today = iso(new Date());
+      let html = ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => `<div class="sg-head">${d}</div>`).join('');
+      for (let i = 0; i < offset; i++) html += '<div class="sg-cell empty"></div>';
+      for (let d = 1; d <= last; d++) {
+        const day = `${y}-${pad(m + 1)}-${pad(d)}`, list = dayClasses(day);
+        const busy = busyMerged(list).reduce((s, b) => s + b.e - b.s, 0);
+        const pct = Math.min(100, busy / (DAY_END - DAY_START) * 100);
+        html += `<div class="sg-cell ${day === today ? 'today' : ''} ${day === schedDay ? 'sel' : ''}" data-d="${day}"><div class="sg-num">${d}</div>${list.slice(0, 2).map(x => `<div class="sg-ev ${x.c.completed ? 'done' : ''}">${hs(x.s)}–${hs(x.e)}</div>`).join('')}${list.length > 2 ? `<div class="sg-more">+${list.length - 2}</div>` : ''}<div class="sg-load"><div style="width:${pct}%"></div></div></div>`;
+      }
+      grid.innerHTML = html;
+      renderDayDetail();
+    }
+    function renderDayDetail() {
+      const box = document.getElementById('day-detail'); if (!box) return;
+      const list = dayClasses(schedDay), free = freeSlots(list), busy = busyMerged(list);
+      const pos = a => (Math.max(DAY_START, Math.min(DAY_END, a)) - DAY_START) / (DAY_END - DAY_START) * 100;
+      const seg = (cls, x) => `<i class="${cls}" style="left:${pos(x.s)}%;width:${pos(x.e) - pos(x.s)}%"></i>`;
+      const title = new Date(schedDay + 'T00:00').toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+      const items = [...list.map(x => ({ t: 'busy', s: x.s, e: x.e, x })), ...free.map(f => ({ t: 'free', s: f.s, e: f.e }))].sort((a, b) => a.s - b.s);
+      box.innerHTML = `<h2 style="text-transform:capitalize;margin-bottom:4px;">${title}</h2>
+        <div class="tl">${free.map(f => seg('free', f)).join('')}${busy.map(b => seg('busy', b)).join('')}</div>
+        <div class="tl-scale"><span>6:00</span><span>10:00</span><span>14:00</span><span>18:00</span><span>22:00</span></div>
+        ${items.map(i => i.t === 'busy'
+          ? `<div class="slot busy"><span>${hh(i.s)} – ${hh(i.e)} · ${esc(i.x.c.clienteName)}</span><small>${i.x.c.completed ? 'Lista' : 'Pendiente'}</small></div>`
+          : `<div class="slot free"><span>Disponible ${hh(i.s)} – ${hh(i.e)}</span><small>${fmtH((i.e - i.s) / 60)}</small></div>`).join('')}
+        ${free.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;margin-bottom:10px;">Día completo, sin intervalos libres.</p>'}
+        <button class="btn-primary" id="sched-add" style="margin-top:8px;">Agendar en este día</button>`;
+      document.getElementById('sched-add').onclick = () => {
+        const t = free.length ? hh(free[0].s) : '08:00';
+        document.getElementById('class-date').value = `${schedDay}T${t}`;
+        selectedDateFilter = schedDay;
+        buildCalendarStrip(false); updateRepeatHint(); renderApp(); switchTab('clases');
+      };
+    }
+    function initSchedule() {
+      document.getElementById('sched-grid').addEventListener('click', e => {
+        const c = e.target.closest('.sg-cell[data-d]'); if (!c) return;
+        schedDay = c.dataset.d; renderSchedule();
+      });
+      const go = delta => {
+        schedMonth = new Date(schedMonth.getFullYear(), schedMonth.getMonth() + delta, 1);
+        const n = new Date();
+        schedDay = (schedMonth.getFullYear() === n.getFullYear() && schedMonth.getMonth() === n.getMonth()) ? iso(n) : iso(schedMonth);
+        renderSchedule();
+      };
+      document.getElementById('sched-prev').onclick = () => go(-1);
+      document.getElementById('sched-next').onclick = () => go(1);
+      setInterval(syncClock, 30000);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) syncClock(); });
+      window.addEventListener('focus', syncClock);
+      renderSchedule();
     }
 
     // ---------- Firestore ----------
@@ -310,10 +481,15 @@
       const hours = parseFloat(document.getElementById('hours-count').value);
       const client = currentClients.find(c => c.id === clientId);
       if (!client) return;
+      const dates = buildDates(date);
+      const clash = dates.filter(d => conflictsFor(d, hours).length);
+      if (clash.length && !confirm(`${clash.length} de ${dates.length} clase(s) chocan con horarios ya ocupados (${clash.map(d => d.slice(5, 10)).join(', ')}). ¿Agendar de todos modos?`)) return;
+      const group = String(Date.now());
       try {
-        await addDoc(clasesRef, { clientId: client.id, clienteName: client.name, hourlyRate: client.rate, classDate: date, hours, completed: false, createdAt: new Date().toISOString() });
+        await Promise.all(dates.map(d => addDoc(clasesRef, { clientId: client.id, clienteName: client.name, hourlyRate: client.rate, classDate: d, hours, completed: false, repeatGroup: dates.length > 1 ? group : null, createdAt: new Date().toISOString() })));
         document.getElementById('class-form').reset();
-        updateFormDateInput(date.split('T')[0], date.split('T')[1]); // conserva la fecha elegida
+        document.getElementById('class-date').value = date;
+        setRepeat('none');
         showSuccessModal();
       } catch (err) { console.error(err); }
     });
@@ -373,7 +549,7 @@
 
       document.getElementById('total-hours').innerText = fmtH(totalHours);
       document.getElementById('total-earnings').innerText = money(totalEarnings);
-      renderIncome();
+      renderIncome(); renderSchedule();
     }
 
     // ---------- ESTUDIO DE INGRESOS ----------
