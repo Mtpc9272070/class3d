@@ -4,7 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ClassManager Pro</title>
+  
+  <!-- Soportes de PWA e Instalación -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0d10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ClassManager" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
   <style>
     :root {
       --bg-dark: #0b0d10;
@@ -37,7 +47,22 @@
       overflow-x: hidden;
     }
 
-    /* SVG ICONS BASE */
+    /* BARRA DE ESTADO DE CONEXIÓN */
+    #offline-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--accent-red);
+      color: #fff;
+      text-align: center;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      z-index: 99999;
+      display: none;
+    }
+
     .icon {
       width: 18px;
       height: 18px;
@@ -50,7 +75,7 @@
       vertical-align: middle;
     }
 
-    /* SPLASH SCREEN ANIMADA CON LOGO Y NOMBRE */
+    /* SPLASH SCREEN CON LOGO SVG */
     #splash-screen {
       position: fixed;
       inset: 0;
@@ -76,9 +101,6 @@
       border-radius: 28px;
       display: grid;
       place-items: center;
-      font-size: 2.8rem;
-      font-weight: 800;
-      color: #000;
       box-shadow: 0 0 40px rgba(255, 102, 0, 0.4);
       animation: logoEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards;
     }
@@ -111,7 +133,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* CONTENEDOR MÓVIL PRINCIPAL */
     .app-viewport {
       width: 100%;
       max-width: 480px;
@@ -123,7 +144,6 @@
       padding-bottom: 90px;
     }
 
-    /* HEADER */
     header {
       padding: 16px 20px;
       display: flex;
@@ -153,7 +173,6 @@
       height: 2.5px;
       background: var(--text-main);
       border-radius: 4px;
-      transition: transform 0.3s ease;
     }
 
     .brand-mini {
@@ -169,9 +188,7 @@
       border-radius: 10px;
       display: grid;
       place-items: center;
-      font-weight: 800;
       color: #000;
-      font-size: 1.1rem;
       box-shadow: 0 0 15px rgba(255, 102, 0, 0.3);
     }
 
@@ -181,7 +198,7 @@
       letter-spacing: -0.3px;
     }
 
-    /* DRAWER LATERAL DE NAVEGACIÓN */
+    /* DRAWER */
     .drawer-overlay {
       position: fixed;
       inset: 0;
@@ -193,16 +210,11 @@
       transition: all 0.3s ease;
     }
 
-    .drawer-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
+    .drawer-overlay.active { opacity: 1; visibility: visible; }
 
     .drawer {
       position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
+      top: 0; left: 0; bottom: 0;
       width: 280px;
       background: var(--card-bg);
       z-index: 1001;
@@ -214,9 +226,7 @@
       border-right: 1px solid var(--border-color);
     }
 
-    .drawer.active {
-      transform: translateX(0);
-    }
+    .drawer.active { transform: translateX(0); }
 
     .drawer-nav {
       margin-top: 30px;
@@ -232,38 +242,30 @@
       padding: 14px 16px;
       border-radius: 14px;
       color: var(--text-muted);
-      text-decoration: none;
       font-weight: 600;
-      transition: background 0.25s, color 0.25s, transform 0.2s;
       cursor: pointer;
+      transition: background 0.25s, color 0.25s;
     }
 
     .drawer-item.active, .drawer-item:hover {
       background: rgba(255, 102, 0, 0.15);
       color: var(--accent-orange);
-      transform: translateX(4px);
     }
 
-    /* CONTENIDO PRINCIPAL */
-    .content-container {
-      padding: 20px;
-    }
+    .content-container { padding: 20px; }
 
     .tab-content {
       display: none;
       animation: sectionSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content.active { display: block; }
 
     @keyframes sectionSlideIn {
       from { opacity: 0; transform: translateY(18px) scale(0.98); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* RESUMEN DE ESTADÍSTICAS */
     .stats-card {
       background: linear-gradient(135deg, #1d212a 0%, #15181e 100%);
       border-radius: var(--radius);
@@ -291,19 +293,17 @@
       color: var(--accent-green);
     }
 
-    /* CALENDARIO / STRIP DE DÍAS */
+    /* CALENDARIO STRIP AMPLIADO */
     .calendar-strip {
       display: flex;
       gap: 10px;
       overflow-x: auto;
-      padding-bottom: 8px;
+      padding-bottom: 12px;
       margin-bottom: 20px;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
-
-    .calendar-strip::-webkit-scrollbar {
-      display: none;
-    }
+    .calendar-strip::-webkit-scrollbar { display: none; }
 
     .day-pill {
       min-width: 62px;
@@ -337,11 +337,8 @@
       box-shadow: 0 4px 15px rgba(255, 102, 0, 0.35);
     }
 
-    .day-pill.active .day-name, .day-pill.active .day-number {
-      color: #000;
-    }
+    .day-pill.active .day-name, .day-pill.active .day-number { color: #000; }
 
-    /* FORMULARIO Y TARJETAS */
     .card {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -360,10 +357,7 @@
       gap: 8px;
     }
 
-    .form-group {
-      margin-bottom: 14px;
-    }
-
+    .form-group { margin-bottom: 14px; }
     .form-group label {
       display: block;
       font-size: 0.8rem;
@@ -372,7 +366,7 @@
       font-weight: 600;
     }
 
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
       padding: 14px;
       background: var(--bg-dark);
@@ -381,11 +375,6 @@
       color: #fff;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus {
-      border-color: var(--accent-orange);
     }
 
     .btn-primary {
@@ -399,19 +388,13 @@
       cursor: pointer;
       font-size: 1rem;
       box-shadow: 0 4px 15px rgba(255, 102, 0, 0.35);
-      transition: transform 0.15s, opacity 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
     }
 
-    .btn-primary:active {
-      transform: scale(0.97);
-    }
-
-    /* TARJETAS DE CLASES CON ANIMACIONES */
-    .class-card {
+    .class-card, .client-card {
       background: var(--card-hover);
       border-radius: 16px;
       padding: 16px;
@@ -420,41 +403,12 @@
       justify-content: space-between;
       align-items: center;
       border-left: 4px solid var(--accent-orange);
-      transition: transform 0.25s ease, background-color 0.3s ease, border-color 0.3s ease;
-      animation: cardAppear 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards;
+      animation: cardAppear 0.35s ease forwards;
     }
 
     @keyframes cardAppear {
-      from { opacity: 0; transform: translateY(12px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    /* ANIMACIÓN DE ELIMINACIÓN */
-    .class-card.deleting {
-      animation: cardDelete 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-      pointer-events: none;
-    }
-
-    @keyframes cardDelete {
-      0% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-        max-height: 120px;
-        margin-bottom: 12px;
-      }
-      50% {
-        opacity: 0.5;
-        transform: translateX(100px) scale(0.9);
-      }
-      100% {
-        opacity: 0;
-        transform: translateX(180px) scale(0.7);
-        max-height: 0;
-        padding-top: 0;
-        padding-bottom: 0;
-        margin-bottom: 0;
-        border: none;
-      }
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .class-card.completed {
@@ -463,32 +417,18 @@
       background: rgba(0, 210, 106, 0.05);
     }
 
-    .class-info h3 {
+    .class-info h3, .client-info h3 {
       font-size: 1rem;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       font-weight: 700;
     }
 
-    .class-info p {
+    .class-info p, .client-info p {
       font-size: 0.8rem;
       color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-top: 2px;
-    }
-
-    .class-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-    }
-
-    .class-price {
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: var(--accent-green);
     }
 
     .action-buttons {
@@ -506,21 +446,11 @@
       font-size: 0.75rem;
       cursor: pointer;
       font-weight: 700;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .check-btn:active {
-      transform: scale(0.92);
     }
 
     .check-btn.active {
       background: var(--accent-green);
       color: #000;
-      border-color: var(--accent-green);
-      box-shadow: 0 0 12px rgba(0, 210, 106, 0.4);
     }
 
     .delete-btn {
@@ -533,20 +463,8 @@
       cursor: pointer;
       display: grid;
       place-items: center;
-      transition: all 0.2s ease;
     }
 
-    .delete-btn:hover {
-      background: rgba(255, 77, 77, 0.25);
-    }
-
-    .delete-btn:active {
-      transform: scale(0.85) rotate(-12deg);
-      background: var(--accent-red);
-      color: #fff;
-    }
-
-    /* INGRESOS MENSUALES */
     .income-group {
       background: var(--card-bg);
       border-radius: 14px;
@@ -556,10 +474,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      animation: cardAppear 0.3s ease forwards;
     }
 
-    /* MODALES PERSONALIZADOS ESTILO DIDI */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -573,10 +489,7 @@
       transition: all 0.3s ease;
     }
 
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
 
     .modal-card {
       background: var(--card-bg);
@@ -586,83 +499,11 @@
       text-align: center;
       width: 85%;
       max-width: 340px;
-      transform: scale(0.8);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
     }
 
-    .modal-overlay.active .modal-card {
-      transform: scale(1);
-    }
-
-    .modal-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      margin: 0 auto 16px;
-    }
-
-    .modal-icon.green {
-      background: var(--accent-green);
-      color: #000;
-      box-shadow: 0 0 25px rgba(0, 210, 106, 0.4);
-    }
-
-    .modal-icon.red {
-      background: rgba(255, 77, 77, 0.15);
-      color: var(--accent-red);
-      border: 1px solid var(--accent-red);
-      box-shadow: 0 0 25px rgba(255, 77, 77, 0.3);
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn-secondary {
-      flex: 1;
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      font-weight: 700;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.2s;
-    }
-
-    .btn-secondary:active {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .btn-danger {
-      flex: 1;
-      padding: 14px;
-      background: var(--accent-red);
-      border: none;
-      color: #ffffff;
-      font-weight: 800;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      box-shadow: 0 4px 15px rgba(255, 77, 77, 0.35);
-      transition: transform 0.15s;
-    }
-
-    .btn-danger:active {
-      transform: scale(0.96);
-    }
-
-    /* BARRA DE NAVEGACIÓN INFERIOR */
     .bottom-nav {
       position: fixed;
-      bottom: 0;
-      left: 50%;
+      bottom: 0; left: 50%;
       transform: translateX(-50%);
       width: 100%;
       max-width: 480px;
@@ -686,60 +527,50 @@
       font-size: 0.7rem;
       font-weight: 600;
       cursor: pointer;
-      width: 33%;
-      transition: color 0.2s;
+      width: 25%;
     }
 
-    .nav-button.active {
+    .nav-button.active { color: var(--accent-orange); }
+
+    #pwa-install-btn {
+      display: none;
+      background: rgba(255, 102, 0, 0.15);
       color: var(--accent-orange);
+      border: 1px solid var(--accent-orange);
+      padding: 10px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 15px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
-  <!-- SPLASH SCREEN ANIMADA -->
+  <!-- BANNER INTERNET -->
+  <div id="offline-banner">⚠️ Modo Sin Conexión a Internet</div>
+
+  <!-- SPLASH SCREEN -->
   <div id="splash-screen">
-    <div class="splash-logo">C</div>
+    <div class="splash-logo">
+      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+      </svg>
+    </div>
     <div class="splash-title">ClassManager</div>
     <div class="splash-subtitle">Control de Clases e Ingresos</div>
   </div>
 
-  <!-- MODAL DE ÉXITO AL AGENDAR -->
+  <!-- MODAL DE ÉXITO -->
   <div class="modal-overlay" id="success-modal">
     <div class="modal-card">
-      <div class="modal-icon green">
-        <svg class="icon" viewBox="0 0 24 24" style="width:32px; height:32px; stroke:#000;">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      </div>
-      <h3 style="font-size: 1.2rem; margin-bottom: 6px;">¡Clase Agendada!</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">
-        Guardada exitosamente en Firebase Firestore.
-      </p>
+      <h3 style="font-size: 1.2rem; margin-bottom: 6px;">¡Registro Exitoso!</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Guardado correctamente en Firestore.</p>
       <div style="margin-top: 20px;">
         <button class="btn-primary" onclick="closeSuccessModal()">Continuar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN -->
-  <div class="modal-overlay" id="delete-modal">
-    <div class="modal-card">
-      <div class="modal-icon red">
-        <svg class="icon" viewBox="0 0 24 24" style="width:32px; height:32px;">
-          <polyline points="3 6 5 6 21 6"></polyline>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          <line x1="10" y1="11" x2="10" y2="17"></line>
-          <line x1="14" y1="11" x2="14" y2="17"></line>
-        </svg>
-      </div>
-      <h3 style="font-size: 1.15rem; margin-bottom: 6px;">¿Eliminar Clase?</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted);" id="delete-modal-text">
-        ¿Estás seguro de que deseas eliminar esta clase agendada?
-      </p>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
-        <button class="btn-danger" id="confirm-delete-btn">Eliminar</button>
       </div>
     </div>
   </div>
@@ -749,22 +580,29 @@
     <!-- HEADER -->
     <header>
       <button class="menu-toggle" id="menu-btn">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
       <div class="brand-mini">
-        <div class="brand-icon">C</div>
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+        </div>
         <div class="brand-title">ClassManager</div>
       </div>
       <div style="width: 22px;"></div>
     </header>
 
-    <!-- DRAWER LATERAL -->
+    <!-- DRAWER -->
     <div class="drawer-overlay" id="drawer-overlay"></div>
     <aside class="drawer" id="drawer">
       <div class="brand-mini">
-        <div class="brand-icon">C</div>
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          </svg>
+        </div>
         <div class="brand-title">ClassManager</div>
       </div>
       <nav class="drawer-nav">
@@ -772,14 +610,15 @@
           <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           Clases y Agenda
         </div>
+        <div class="drawer-item" onclick="switchTab('clientes')">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Clientes y Alumnos
+        </div>
         <div class="drawer-item" onclick="switchTab('ingresos')">
           <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
           Ingresos Mensuales
         </div>
-        <div class="drawer-item" onclick="replaySplash()">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-          Repetir Animación Splash
-        </div>
+        <button id="pwa-install-btn">📲 Instalar Aplicación</button>
       </nav>
     </aside>
 
@@ -798,23 +637,19 @@
         </div>
       </section>
 
-      <!-- TAB 1: CLASES Y CALENDARIO -->
+      <!-- TAB 1: CLASES -->
       <section id="tab-clases" class="tab-content active">
-        
-        <!-- CALENDARIO INTERACTIVO HORIZONTAL CON FILTRO -->
-        <div class="calendar-strip" id="calendar-strip">
-          <!-- Generado dinámicamente -->
-        </div>
+        <!-- CALENDARIO AMPLIADO DE 14 DÍAS -->
+        <div class="calendar-strip" id="calendar-strip"></div>
 
         <div class="card">
-          <h2>
-            <svg class="icon" viewBox="0 0 24 24" style="stroke: var(--accent-orange);"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Agendar Nueva Clase
-          </h2>
+          <h2>Agendar Nueva Clase</h2>
           <form id="class-form">
             <div class="form-group">
-              <label>Cliente / Alumno</label>
-              <input type="text" id="client-name" placeholder="Ej. Juan Sebastián" required />
+              <label>Seleccionar Cliente</label>
+              <select id="select-client" required>
+                <option value="">Cargando clientes...</option>
+              </select>
             </div>
             <div class="form-group">
               <label>Fecha y Hora</label>
@@ -824,44 +659,54 @@
               <label>Duración (Horas)</label>
               <input type="number" id="hours-count" step="0.5" value="1" required />
             </div>
-            <div class="form-group">
-              <label>Precio por Hora ($)</label>
-              <input type="number" id="hourly-rate" value="30000" step="1000" required />
-            </div>
             <button type="submit" class="btn-primary" id="btn-submit">
-              <svg class="icon" viewBox="0 0 24 24" style="stroke:#000;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               Agendar en Firestore
             </button>
           </form>
         </div>
 
-        <h2 style="font-size: 1.1rem; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
-          <svg class="icon" viewBox="0 0 24 24" style="stroke: var(--accent-orange);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span id="classes-list-title">Clases Agendadas</span>
-        </h2>
-        <div id="classes-list">
-          <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">Cargando clases desde Firebase...</p>
-        </div>
+        <h2>Clases Agendadas</h2>
+        <div id="classes-list"></div>
       </section>
 
-      <!-- TAB 2: INGRESOS MENSUALES -->
-      <section id="tab-ingresos" class="tab-content">
-        <h2 style="font-size: 1.1rem; margin-bottom: 16px; display:flex; align-items:center; gap:8px;">
-          <svg class="icon" viewBox="0 0 24 24" style="stroke: var(--accent-green);"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          Ingresos Mensuales por Fecha
-        </h2>
-        <div id="income-breakdown">
-          <!-- Se renderiza dinámicamente -->
+      <!-- TAB 2: CLIENTES -->
+      <section id="tab-clientes" class="tab-content">
+        <div class="card">
+          <h2>Registrar Nuevo Cliente</h2>
+          <form id="client-form">
+            <div class="form-group">
+              <label>Nombre del Alumno / Cliente</label>
+              <input type="text" id="client-name-input" placeholder="Ej. Camilo" required />
+            </div>
+            <div class="form-group">
+              <label>Precio por Hora ($)</label>
+              <input type="number" id="client-rate-input" value="30000" step="1000" required />
+            </div>
+            <button type="submit" class="btn-primary">Guardar Cliente</button>
+          </form>
         </div>
+
+        <h2>Lista de Clientes</h2>
+        <div id="clients-list"></div>
+      </section>
+
+      <!-- TAB 3: INGRESOS -->
+      <section id="tab-ingresos" class="tab-content">
+        <h2>Ingresos por Fecha</h2>
+        <div id="income-breakdown"></div>
       </section>
 
     </main>
 
-    <!-- NAVEGACIÓN INFERIOR CON ÍCONOS SVG -->
+    <!-- NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
       <button class="nav-button active" id="nav-clases" onclick="switchTab('clases')">
         <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
         <span>Clases</span>
+      </button>
+      <button class="nav-button" id="nav-clientes" onclick="switchTab('clientes')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        <span>Clientes</span>
       </button>
       <button class="nav-button" id="nav-ingresos" onclick="switchTab('ingresos')">
         <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
@@ -871,67 +716,72 @@
 
   </div>
 
-  <!-- FIREBASE V10 Y LÓGICA -->
+  <!-- LÓGICA Y FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      onSnapshot, 
-      doc, 
-      updateDoc, 
-      deleteDoc,
-      query, 
-      orderBy 
+      getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 1. REEMPLAZA CON TUS CREDENCIALES DE TU CONSOLA DE FIREBASE
-   const firebaseConfig = {
-  apiKey: "AIzaSyBWUHXgcCSrWtqUKGXk9pwxu3Ui8e92-kk",
-  authDomain: "class-v2-4bd36.firebaseapp.com",
-  databaseURL: "https://class-v2-4bd36-default-rtdb.firebaseio.com",
-  projectId: "class-v2-4bd36",
-  storageBucket: "class-v2-4bd36.firebasestorage.app",
-  messagingSenderId: "803937718264",
-  appId: "1:803937718264:web:0fc9e3e9c92fd9bd93d00d",
-  measurementId: "G-WP15SBSW5C"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUHXgcCSrWtqUKGXk9pwxu3Ui8e92-kk",
+      authDomain: "class-v2-4bd36.firebaseapp.com",
+      databaseURL: "https://class-v2-4bd36-default-rtdb.firebaseio.com",
+      projectId: "class-v2-4bd36",
+      storageBucket: "class-v2-4bd36.firebasestorage.app",
+      messagingSenderId: "803937718264",
+      appId: "1:803937718264:web:0fc9e3e9c92fd9bd93d00d"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const clasesRef = collection(db, "clases");
+    const clientesRef = collection(db, "clientes");
 
     let currentClasses = [];
+    let currentClients = [];
     let selectedDateFilter = null;
-    let pendingDeleteData = null; // Almacena temporalmente la clase a eliminar
 
-    // Ocultar Splash
+    // DETECCIÓN DE ESTADO DE CONEXIÓN A INTERNET
+    function updateOnlineStatus() {
+      const banner = document.getElementById('offline-banner');
+      if (!navigator.onLine) {
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
     window.addEventListener('load', () => {
-      buildCalendarStrip();
-      setTimeout(() => {
-        document.getElementById('splash-screen').classList.add('hidden');
-      }, 2200);
+      updateOnlineStatus();
+      buildCalendarStrip(14); // Genera 14 días en el calendario
+      setTimeout(() => { document.getElementById('splash-screen').classList.add('hidden'); }, 2000);
+      
+      // REGISTRAR SERVICE WORKER PARA LA PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+      }
     });
 
-    window.replaySplash = () => {
-      const splash = document.getElementById('splash-screen');
-      splash.classList.remove('hidden');
-      closeDrawer();
-      setTimeout(() => { splash.classList.add('hidden'); }, 2200);
-    };
-
-    // STRIP DE CALENDARIO
-    function buildCalendarStrip() {
+    // CONSTRUIR CALENDARIO Y AGREGAR FECHA AL FORMULARIO AL SELECCIONAR DÍA
+    function buildCalendarStrip(daysToShow = 14) {
       const strip = document.getElementById('calendar-strip');
       strip.innerHTML = '';
       
+      const todayObj = new Date();
+      const year = todayObj.getFullYear();
+      const month = String(todayObj.getMonth() + 1).padStart(2, '0');
+      const dayNum = String(todayObj.getDate()).padStart(2, '0');
+      const todayISO = `${year}-${month}-${dayNum}`;
+
+      selectedDateFilter = todayISO;
+      updateFormDateInput(todayISO, "08:00");
+
       const allPill = document.createElement('div');
-      allPill.className = `day-pill ${selectedDateFilter === null ? 'active' : ''}`;
-      allPill.innerHTML = `
-        <div class="day-name">TODOS</div>
-        <div class="day-number">∞</div>
-      `;
+      allPill.className = `day-pill`;
+      allPill.innerHTML = `<div class="day-name">TODOS</div><div class="day-number">∞</div>`;
       allPill.onclick = () => {
         selectedDateFilter = null;
         updateActiveCalendarPill(allPill);
@@ -939,16 +789,14 @@
       };
       strip.appendChild(allPill);
 
-      const today = new Date();
-
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < daysToShow; i++) {
         const date = new Date();
-        date.setDate(today.getDate() + i);
+        date.setDate(todayObj.getDate() + i);
 
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const dayNum = String(date.getDate()).padStart(2, '0');
-        const isoDate = `${year}-${month}-${dayNum}`;
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const isoDate = `${y}-${m}-${d}`;
 
         const dayName = date.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', '');
 
@@ -961,6 +809,7 @@
         pill.onclick = () => {
           selectedDateFilter = isoDate;
           updateActiveCalendarPill(pill);
+          updateFormDateInput(isoDate); // Agrega directamente la fecha al input del formulario
           renderApp();
         };
         strip.appendChild(pill);
@@ -972,109 +821,116 @@
       targetPill.classList.add('active');
     }
 
-    // ESCUCHAR EN TIEMPO REAL DESDE FIRESTORE
-    const q = query(clasesRef, orderBy("classDate", "desc"));
-    onSnapshot(q, (snapshot) => {
+    function updateFormDateInput(isoDate, defaultTime = null) {
+      const dateInput = document.getElementById('class-date');
+      if (!dateInput) return;
+
+      let currentTime = defaultTime || "08:00";
+      if (dateInput.value && dateInput.value.includes('T')) {
+        currentTime = dateInput.value.split('T')[1];
+      }
+
+      dateInput.value = `${isoDate}T${currentTime}`;
+    }
+
+    // OBTENER CLIENTES DESDE FIRESTORE
+    onSnapshot(clientesRef, (snapshot) => {
+      currentClients = [];
+      snapshot.forEach((docSnap) => {
+        currentClients.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      renderClients();
+    });
+
+    // OBTENER CLASES DESDE FIRESTORE
+    const qClases = query(clasesRef, orderBy("classDate", "desc"));
+    onSnapshot(qClases, (snapshot) => {
       currentClasses = [];
       snapshot.forEach((docSnap) => {
         currentClasses.push({ id: docSnap.id, ...docSnap.data() });
       });
       renderApp();
-    }, (error) => {
-      console.warn("Modo demo o credenciales pendientes:", error);
-      document.getElementById('classes-list').innerHTML = `
-        <div style="background: rgba(255, 102, 0, 0.1); border: 1px solid var(--accent-orange); padding: 12px; border-radius: 12px; color: var(--accent-orange); font-size: 0.85rem; text-align: center;">
-          Coloca tus llaves reales de <b>firebaseConfig</b> para conectar Firestore en tiempo real.
-        </div>
-      `;
     });
 
-    // AGENDAR EN FIRESTORE
+    // REGISTRAR NUEVO CLIENTE
+    document.getElementById('client-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('client-name-input').value;
+      const rate = parseFloat(document.getElementById('client-rate-input').value);
+
+      try {
+        await addDoc(clientesRef, { name, rate, createdAt: new Date().toISOString() });
+        document.getElementById('client-form').reset();
+        showSuccessModal();
+      } catch (err) { console.error(err); }
+    });
+
+    // AGENDAR CLASE VINCULADA AL CLIENTE
     document.getElementById('class-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('btn-submit');
-      btn.innerText = "Guardando...";
-      btn.style.opacity = "0.7";
-
-      const client = document.getElementById('client-name').value;
+      const clientId = document.getElementById('select-client').value;
       const date = document.getElementById('class-date').value;
       const hours = parseFloat(document.getElementById('hours-count').value);
-      const rate = parseFloat(document.getElementById('hourly-rate').value);
+
+      const client = currentClients.find(c => c.id === clientId);
+      if (!client) return;
 
       try {
         await addDoc(clasesRef, {
-          clienteName: client,
+          clientId: client.id,
+          clienteName: client.name,
+          hourlyRate: client.rate,
           classDate: date,
           hours: hours,
-          hourlyRate: rate,
           completed: false,
           createdAt: new Date().toISOString()
         });
-
         document.getElementById('class-form').reset();
         showSuccessModal();
-      } catch (err) {
-        console.error("Error al guardar en Firebase: ", err);
-      } finally {
-        btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24" style="stroke:#000;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Agendar en Firestore`;
-        btn.style.opacity = "1";
-      }
+      } catch (err) { console.error(err); }
     });
 
-    // CHECK-IN EN FIRESTORE
-    window.toggleCheck = async (id, currentStatus) => {
-      try {
-        const classDocRef = doc(db, "clases", id);
-        await updateDoc(classDocRef, {
-          completed: !currentStatus
-        });
-      } catch (err) {
-        console.error("Error al actualizar en Firestore: ", err);
+    window.toggleCheck = async (id, status) => {
+      await updateDoc(doc(db, "clases", id), { completed: !status });
+    };
+
+    window.deleteClass = async (id) => {
+      await deleteDoc(doc(db, "clases", id));
+    };
+
+    window.deleteClient = async (id) => {
+      await deleteDoc(doc(db, "clientes", id));
+    };
+
+    function renderClients() {
+      const select = document.getElementById('select-client');
+      const list = document.getElementById('clients-list');
+      select.innerHTML = '<option value="">Seleccione un cliente...</option>';
+      list.innerHTML = '';
+
+      if (currentClients.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No hay clientes registrados.</p>';
       }
-    };
 
-    // MODAL Y LÓGICA DE ELIMINACIÓN CON ANIMACIÓN
-    window.promptDeleteClass = (id, clientName, btnElement) => {
-      const card = btnElement.closest('.class-card');
-      pendingDeleteData = { id, clientName, card };
-      
-      document.getElementById('delete-modal-text').innerHTML = `
-        ¿Estás seguro de que deseas eliminar la clase de <b>${clientName}</b>?
-      `;
-      document.getElementById('delete-modal').classList.add('active');
-    };
+      currentClients.forEach(c => {
+        select.innerHTML += `<option value="${c.id}">${c.name} ($${c.rate.toLocaleString()}/h)</option>`;
 
-    window.closeDeleteModal = () => {
-      document.getElementById('delete-modal').classList.remove('active');
-      pendingDeleteData = null;
-    };
+        const item = document.createElement('div');
+        item.className = 'client-card';
+        item.innerHTML = `
+          <div class="client-info">
+            <h3>${c.name}</h3>
+            <p>Tarifa: $${c.rate.toLocaleString()} / hora</p>
+          </div>
+          <button class="delete-btn" onclick="deleteClient('${c.id}')">✕</button>
+        `;
+        list.appendChild(item);
+      });
+    }
 
-    document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-      if (!pendingDeleteData) return;
-
-      const { id, card } = pendingDeleteData;
-      closeDeleteModal();
-
-      if (card) {
-        card.classList.add('deleting');
-        setTimeout(async () => {
-          try {
-            const classDocRef = doc(db, "clases", id);
-            await deleteDoc(classDocRef);
-          } catch (err) {
-            console.error("Error al eliminar clase en Firestore: ", err);
-            card.classList.remove('deleting');
-          }
-        }, 400);
-      }
-    });
-
-    // RENDERIZAR VISTAS
     function renderApp() {
       const container = document.getElementById('classes-list');
       const incomeContainer = document.getElementById('income-breakdown');
-      const titleElement = document.getElementById('classes-list-title');
-      
       container.innerHTML = '';
       incomeContainer.innerHTML = '';
 
@@ -1084,27 +940,18 @@
 
       let filteredClasses = currentClasses;
       if (selectedDateFilter) {
-        filteredClasses = currentClasses.filter(item => {
-          if (!item.classDate) return false;
-          const classDay = item.classDate.split('T')[0];
-          return classDay === selectedDateFilter;
-        });
-        titleElement.innerText = `Clases del ${selectedDateFilter}`;
-      } else {
-        titleElement.innerText = "Todas las Clases Agendadas";
+        filteredClasses = currentClasses.filter(item => item.classDate && item.classDate.split('T')[0] === selectedDateFilter);
       }
 
       if (filteredClasses.length === 0) {
-        container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px 0;">No hay clases agendadas para ${selectedDateFilter ? selectedDateFilter : 'mostrar'}.</p>`;
+        container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px 0;">Sin clases para la fecha seleccionada.</p>`;
       }
 
       currentClasses.forEach((item) => {
         const cost = item.hours * item.hourlyRate;
-        
         if (item.completed) {
           totalHours += item.hours;
           totalEarnings += cost;
-
           const dayKey = item.classDate ? item.classDate.split('T')[0] : 'Sin fecha';
           dateGroup[dayKey] = (dateGroup[dayKey] || 0) + cost;
         }
@@ -1121,32 +968,18 @@
         card.innerHTML = `
           <div class="class-info">
             <h3>${item.clienteName}</h3>
-            <p>
-              <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              ${dateStr}
-            </p>
-            <p>
-              <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              ${item.hours} hr(s) x $${item.hourlyRate.toLocaleString()}
-            </p>
+            <p>${dateStr} - ${item.hours}h x $${item.hourlyRate.toLocaleString()}</p>
           </div>
-          <div class="class-meta">
-            <div class="class-price">$${cost.toLocaleString()}</div>
-            <div class="action-buttons">
-              <button class="check-btn ${item.completed ? 'active' : ''}" onclick="toggleCheck('${item.id}', ${item.completed})">
-                <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                ${item.completed ? 'Lista' : 'Check'}
-              </button>
-              <button class="delete-btn" title="Eliminar clase" onclick="promptDeleteClass('${item.id}', '${item.clienteName}', this)">
-                <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
-            </div>
+          <div class="action-buttons">
+            <span style="font-weight:800; color:var(--accent-green);">$${cost.toLocaleString()}</span>
+            <button class="check-btn ${item.completed ? 'active' : ''}" onclick="toggleCheck('${item.id}', ${item.completed})">${item.completed ? 'Lista' : 'Check'}</button>
+            <button class="delete-btn" onclick="deleteClass('${item.id}')">✕</button>
           </div>
         `;
         container.appendChild(card);
       });
 
-      // Renderizar Ingresos por Fecha
+      // Renderizar Ingresos
       const sortedDates = Object.keys(dateGroup).sort().reverse();
       if (sortedDates.length === 0) {
         incomeContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">Sin ingresos registrados.</p>';
@@ -1156,11 +989,8 @@
           row.className = 'income-group';
           row.innerHTML = `
             <div>
-              <div style="font-weight: 700; font-size: 0.95rem; display:flex; align-items:center; gap:6px;">
-                <svg class="icon" viewBox="0 0 24 24" style="width:16px; height:16px; stroke:var(--accent-orange);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                ${day}
-              </div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:2px;">Total cobrado en el día</div>
+              <div style="font-weight: 700; font-size: 0.95rem;">${day}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Total cobrado</div>
             </div>
             <div style="font-weight: 800; color: var(--accent-green); font-size: 1.1rem;">
               +$${dateGroup[day].toLocaleString()}
@@ -1174,13 +1004,8 @@
       document.getElementById('total-earnings').innerText = `$${totalEarnings.toLocaleString()}`;
     }
 
-    function showSuccessModal() {
-      document.getElementById('success-modal').classList.add('active');
-    }
-
-    window.closeSuccessModal = () => {
-      document.getElementById('success-modal').classList.remove('active');
-    };
+    function showSuccessModal() { document.getElementById('success-modal').classList.add('active'); }
+    window.closeSuccessModal = () => { document.getElementById('success-modal').classList.remove('active'); };
 
     window.switchTab = (tabName) => {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1189,7 +1014,6 @@
 
       document.getElementById(`tab-${tabName}`).classList.add('active');
       document.getElementById(`nav-${tabName}`)?.classList.add('active');
-
       closeDrawer();
     };
 
@@ -1203,11 +1027,29 @@
     });
 
     overlay.addEventListener('click', closeDrawer);
-
     function closeDrawer() {
       drawer.classList.remove('active');
       overlay.classList.remove('active');
     }
+
+    // BOTÓN DE INSTALACIÓN PWA
+    let deferredPrompt;
+    const installBtn = document.getElementById('pwa-install-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          installBtn.style.display = 'none';
+        });
+      }
+    });
   </script>
 </body>
 </html>
