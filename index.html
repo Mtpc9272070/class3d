@@ -626,7 +626,7 @@
 
       document.getElementById('total-hours').innerText = fmtH(totalHours);
       document.getElementById('total-earnings').innerText = money(totalEarnings);
-      renderIncome(); renderSchedule(); renderAlerts(); scheduleReminders(); maybeDailyNotify(); tickStatus(); justDone.clear(); maybeShowWelcome(); checkEnded();
+      renderIncome(); renderSchedule(); renderAlerts(); scheduleReminders(); maybeDailyNotify(); checkGoalMilestones(); tickStatus(); justDone.clear(); maybeShowWelcome(); checkEnded();
     }
 
     // ---------- ESTUDIO DE INGRESOS ----------
@@ -798,28 +798,91 @@
       SFX.play('alert');
       try {
         const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
-        const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
+        const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png', vibrate: [120, 60, 120] };
         if (reg) await reg.showNotification(title, opts); else new Notification(title, opts);
       } catch (e) { console.log('Notif error:', e); }
     }
+    // ---- Mensajes creativos para notificaciones ----
+    const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+    function NM(kind, c) {
+      const n = c.clienteName, hm = hmLabel(c), d = fmtH(c.hours), pay = money(c.hours * c.hourlyRate), half = fmtH(c.hours / 2);
+      const L = {
+        pre: [
+          ['⏰ ¡Prepárate!', `En 15 minutos empieza tu clase con ${n}. Respira, repasa y a brillar ✨`],
+          ['📚 Cuenta regresiva', `${n} te espera a las ${hm}. ¿Material listo y buena energía? 💪`],
+          ['🔔 Falta poquito', `15 min para ${n} (${d}). Esta clase suma ${pay} 💰`],
+          ['🎒 Check rápido', `Agua, material y sonrisa: en 15 minutos arranca ${n}.`]
+        ],
+        start: [
+          ['🚀 ¡Es la hora!', `Tu clase con ${n} empieza ahora. ¡Que sea una gran sesión!`],
+          ['🔥 ¡Arrancamos!', `${n} ya está en turno: ${d} de pura energía.`],
+          ['🌟 Hora de brillar', `Clase con ${n} · ${d}. Vamos por esos ${pay} 💸`],
+          ['🎬 ¡Luces, cámara, clase!', `${n} te espera. ¡A darlo todo!`]
+        ],
+        mid: [
+          ['🏃 ¡Mitad de camino!', `Vas por la mitad con ${n}. Quedan ${half}, ¡sigue así!`],
+          ['⚡ Ritmo perfecto', `Ya pasó la mitad de la clase con ${n}. Falta ${half} para cerrar fuerte.`],
+          ['💪 No aflojes', `${half} más con ${n} y otra clase al bolsillo.`]
+        ],
+        end: [
+          ['🎯 ¿Misión cumplida?', `${n} ya terminó. Ábrela y márcala para sumar ${pay} 💰`],
+          ['✅ Tiempo cumplido', `Cerraste la hora con ${n}. ¿La marcamos como completada?`],
+          ['📈 ¡Otra clase al marcador!', `Confirma la clase con ${n} y mira cómo suben tus ingresos.`],
+          ['🏁 Meta de la clase alcanzada', `${n} · ${d}. Toca para confirmar y sumar ${pay}.`]
+        ]
+      };
+      const [t, b] = pickOne(L[kind]); return { t, b };
+    }
+
     function maybeDailyNotify() {
       if (!classesLoaded || !notifOn()) return;
-      const today = iso(new Date()); if (ls('cm_notif_day') === today) return;
+      const now = new Date(), today = iso(now); if (ls('cm_notif_day') === today) return;
       ls('cm_notif_day', today);
-      const a = buildAlerts().filter(x => ['hoy', 'sin', 'mejor', 'sem'].includes(x.k));
-      notify('ClassManager · Resumen de hoy', a.map(x => `${x.h}: ${x.t}`).join('\n'), 'daily');
+      const h = now.getHours(), hi = h < 12 ? '☀️ ¡Buenos días!' : h < 19 ? '🌤️ ¡Buenas tardes!' : '🌙 ¡Buenas noches!';
+      const al = buildAlerts(), get = (k) => al.find(x => x.k === k);
+      const todays = currentClasses.filter(c => dayOf(c) === today && !c.cancelled), parts = [];
+      if (todays.length) {
+        const names = [...new Set(todays.map(c => c.clienteName))].join(', '), pay = money(todays.reduce((s, c) => s + c.hours * c.hourlyRate, 0)), k = todays.length;
+        parts.push(pickOne([`Hoy tienes ${k} clase${k > 1 ? 's' : ''} con ${names}. ¡A por ellas! 💪`, `Agenda del día: ${names}. Hoy en juego: ${pay} 💰`, `${k} clase${k > 1 ? 's' : ''} hoy (${names}). Tú puedes con todo 🚀`]));
+      } else parts.push(pickOne(['Hoy no tienes clases: día libre para planear, descansar o salir a sumar carreras 🌿', 'Agenda despejada hoy. ¡Buen momento para programar las próximas clases! 📅']));
+      if (get('sin')) parts.push('✅ ' + get('sin').t);
+      if (get('mejor')) parts.push('🏆 ' + get('mejor').t);
+      const goal = parseFloat(ls('cm_goal')) || 0;
+      if (goal > 0) {
+        const inc = currentClasses.filter(c => c.completed && dayOf(c).slice(0, 7) === today.slice(0, 7)).reduce((s, c) => s + c.hours * c.hourlyRate, 0);
+        parts.push(inc >= goal ? '🎉 ¡Ya cumpliste tu meta del mes!' : `🎯 Vas al ${Math.round(inc / goal * 100)}% de tu meta; te faltan ${money(goal - inc)}.`);
+      }
+      notify(hi, parts.join('\n'), 'daily');
     }
+
     function scheduleReminders() {
       reminderTimers.forEach(clearTimeout); reminderTimers = [];
       if (!classesLoaded || !notifOn()) return;
-      const now = Date.now();
+      const now = Date.now(), DAY = 24 * 3600000;
+      const at = (ms, fn) => { if (ms > 0 && ms < DAY) reminderTimers.push(setTimeout(fn, ms)); };
+      const go = (kind, c, tag) => () => { const m = NM(kind, c); notify(m.t, m.b, tag + c.id); };
       currentClasses.forEach(c => {
         if (c.completed || c.cancelled) return;
-        const me = endOf(c).getTime() - now;
-        if (me > 0 && me < 24 * 3600000) reminderTimers.push(setTimeout(() => notify('¿Ya cumpliste la clase?', `${c.clienteName} ya terminó. Ábrela para marcarla.`, 'e-' + c.id), me));
-        const ms = startOf(c).getTime() - 15 * 60000 - now;
-        if (ms > 0 && ms < 24 * 3600000) reminderTimers.push(setTimeout(() => notify('Clase en 15 minutos', `${c.clienteName} · ${hmLabel(c)} (${fmtH(c.hours)})`, 'c-' + c.id), ms));
+        const st = startOf(c).getTime(), en = endOf(c).getTime();
+        at(st - 15 * 60000 - now, go('pre', c, 'p-'));
+        at(st - now, go('start', c, 's-'));
+        if (c.hours >= 1) at((st + en) / 2 - now, go('mid', c, 'm-'));
+        at(en - now, go('end', c, 'e-'));
       });
+    }
+
+    function checkGoalMilestones() {
+      if (!classesLoaded) return;
+      const goal = parseFloat(ls('cm_goal')) || 0; if (goal <= 0) return;
+      const mo = iso(new Date()).slice(0, 7);
+      const inc = currentClasses.filter(c => c.completed && dayOf(c).slice(0, 7) === mo).reduce((s, c) => s + c.hours * c.hourlyRate, 0);
+      const ms = [25, 50, 75, 100].filter(m => inc / goal * 100 >= m).pop() || 0;
+      const prev = (ls('cm_goal_ms') || '').split(':'), rec = prev[0] === mo ? (parseInt(prev[1]) || 0) : null;
+      ls('cm_goal_ms', `${mo}:${Math.max(ms, rec || 0)}`);
+      if (rec === null || ms <= rec) return;
+      const left = money(Math.max(0, goal - inc));
+      const T = { 25: ['🎯 ¡Primer cuarto!', `Ya llevas el 25% de tu meta (${money(inc)}). El arranque está hecho 🚀`], 50: ['🔥 ¡Mitad de camino!', `50% de la meta del mes. Te faltan ${left}. ¡Sigue así!`], 75: ['⚡ ¡Recta final!', `75% listo. Solo ${left} para cumplir tu meta 💪`], 100: ['🏆 ¡META CUMPLIDA!', `Superaste los ${money(goal)} del mes. ¡Eres una máquina! 🎉`] };
+      notify(T[ms][0], T[ms][1], 'goal-' + ms);
     }
     function updateBell() { document.getElementById('bell-btn').classList.toggle('on', notifOn()); }
     document.getElementById('bell-btn').addEventListener('click', async () => {
