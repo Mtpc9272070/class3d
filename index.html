@@ -68,7 +68,6 @@
     .check-btn.active{background:var(--accent-green);color:#000}
     .delete-btn{background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.3);color:var(--accent-red);width:32px;height:32px;border-radius:50%;cursor:pointer;display:grid;place-items:center}
     .income-group{background:var(--card-bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
-    /* NUEVO: ANALÍTICA DE INGRESOS */
     .chip-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
     .chip-row::-webkit-scrollbar{display:none}
     .chip{flex-shrink:0;padding:9px 16px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:20px;color:var(--text-muted);font-size:.8rem;font-weight:700;cursor:pointer}
@@ -118,6 +117,46 @@
     .slot.busy{background:rgba(255,102,0,.12);border-left:3px solid var(--accent-orange)}
     .slot.free{background:rgba(0,210,106,.08);border-left:3px solid var(--accent-green)}
     .slot small{color:var(--text-muted);font-weight:600}
+    .bell{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:6px;display:grid;place-items:center}
+    .bell.on{color:var(--accent-orange)}
+    #alerts{margin-bottom:16px}
+    .celebrate{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:3000;pointer-events:none;animation:celOut .4s ease 1.5s forwards}
+    .cel-ring{position:relative;width:96px;height:96px;border-radius:50%;background:rgba(21,24,30,.94);border:1px solid var(--border-color);display:grid;place-items:center;box-shadow:0 0 40px rgba(0,210,106,.45);animation:celPop .5s cubic-bezier(.175,.885,.32,1.4) both}
+    .cel-ring svg{width:64px;height:64px;fill:none;stroke:var(--accent-green);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .cel-ring circle{stroke-dasharray:145;stroke-dashoffset:145;animation:celDraw .5s ease .1s forwards}
+    .cel-ring path{stroke-dasharray:40;stroke-dashoffset:40;animation:celDraw .35s ease .45s forwards}
+    .cel-ring i{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;background:var(--c);opacity:0;animation:celConf .9s ease-out var(--d) .35s forwards}
+    .cel-money{font-size:1.5rem;font-weight:800;color:var(--accent-green);animation:celUp 1.4s ease .3s both}
+    @keyframes celPop{from{transform:scale(0)}to{transform:scale(1)}}
+    @keyframes celOut{to{opacity:0}}
+    @keyframes celDraw{to{stroke-dashoffset:0}}
+    @keyframes celConf{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.4)}}
+    @keyframes celUp{0%{opacity:0;transform:translateY(14px)}30%{opacity:1}100%{opacity:1;transform:translateY(-6px)}}
+    .class-card.just-done{animation:cardAppear .35s ease forwards,doneGlow 1s ease}
+    @keyframes doneGlow{0%{box-shadow:0 0 0 0 rgba(0,210,106,.7);transform:scale(1)}30%{transform:scale(1.03)}100%{box-shadow:0 0 0 18px rgba(0,210,106,0);transform:scale(1)}}
+    .class-card.cancelled{border-left-color:var(--text-muted);opacity:.55}
+    .class-card.live{border-left-color:var(--accent-green);box-shadow:0 0 18px rgba(0,210,106,.25)}
+    .class-info p.ts{font-size:.75rem;font-weight:700;margin-top:3px}
+    .ts.soon,.ts.cancel{color:var(--text-muted)}
+    .ts.live,.ts.done{color:var(--accent-green)}
+    .ts.ended{color:var(--accent-orange)}
+    .btn-ghost{width:100%;padding:13px;background:rgba(255,255,255,.08);border:1px solid var(--border-color);color:var(--text-main);font-weight:700;border-radius:14px;cursor:pointer;font-size:.9rem;margin-top:10px}
+    .wl-dots{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+    .wl-dots i{width:22px;height:4px;border-radius:4px;background:var(--border-color)}
+    .wl-dots i.on{background:var(--accent-orange)}
+    .wl-body{animation:sectionSlideIn .4s cubic-bezier(.16,1,.3,1)}
+    .wl-big{font-size:2.4rem;margin-bottom:6px}
+    .wl-sub{font-size:.82rem;color:var(--text-muted);line-height:1.5;font-weight:600}
+    .wl-list{text-align:left;margin-top:14px}
+    .wl-item{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;background:var(--card-hover);border-left:3px solid var(--accent-orange);margin-bottom:8px;font-size:.82rem;font-weight:600}
+    .wl-item.done{border-left-color:var(--accent-green)}
+    .wl-item small{color:var(--text-muted);font-weight:600;white-space:nowrap}
+    .wl-stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+    .wl-stat div{background:var(--card-hover);border-radius:12px;padding:10px}
+    .wl-stat b{display:block;font-size:1.05rem;color:var(--accent-green)}
+    .wl-stat span{font-size:.66rem;color:var(--text-muted);text-transform:uppercase;font-weight:700}
+    .wl-bar{height:8px;background:var(--bg-dark);border-radius:8px;overflow:hidden;margin:14px 0 6px}
+    .wl-bar div{height:100%;background:var(--accent-green);border-radius:8px;transition:width .6s ease}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:grid;place-items:center;z-index:2000;opacity:0;visibility:hidden;transition:all .3s ease}
     .modal-overlay.active{opacity:1;visibility:visible}
     .modal-card{background:var(--card-bg);border:1px solid var(--border-color);padding:28px 22px;border-radius:24px;text-align:center;width:85%;max-width:340px}
@@ -128,7 +167,7 @@
   </style>
 </head>
 <body>
-  <div id="offline-banner">⚠️ Modo Sin Conexión a Internet</div>
+  <div id="offline-banner">⚠️️ Modo Sin Conexión a Internet</div>
 
   <div id="splash-screen">
     <div class="splash-logo">
@@ -146,6 +185,30 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="welcome-modal">
+    <div class="modal-card" style="max-height:86vh;overflow-y:auto;">
+      <div class="wl-dots" id="wl-dots"></div>
+      <div class="wl-body" id="wl-body"></div>
+      <div style="margin-top:18px;">
+        <button class="btn-primary" id="wl-next">Siguiente</button>
+        <button class="btn-ghost" id="wl-skip">Saltar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="ended-modal">
+    <div class="modal-card">
+      <div style="font-size:2rem;margin-bottom:6px;">⏰</div>
+      <h3 style="font-size:1.15rem;margin-bottom:6px;">¿Ya cumpliste esta clase?</h3>
+      <p id="ended-text" style="font-size:.85rem;color:var(--text-muted);line-height:1.5;"></p>
+      <div style="margin-top:18px;">
+        <button class="btn-primary" id="ended-yes">Sí, completada</button>
+        <button class="btn-ghost" id="ended-later">Todavía no / Más tarde</button>
+        <button class="btn-ghost" id="ended-cancel" style="color:var(--accent-red);">No se realizó</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app-viewport">
     <header>
       <button class="menu-toggle" id="menu-btn"><span></span><span></span><span></span></button>
@@ -153,7 +216,7 @@
         <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg></div>
         <div class="brand-title">ClassManager</div>
       </div>
-      <div style="width:22px;"></div>
+      <button class="bell" id="bell-btn" aria-label="Activar avisos"><svg class="icon" style="width:22px;height:22px" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
     </header>
 
     <div class="drawer-overlay" id="drawer-overlay"></div>
@@ -167,6 +230,7 @@
         <div class="drawer-item" onclick="switchTab('clientes')"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clientes y Alumnos</div>
         <div class="drawer-item" onclick="switchTab('ingresos')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Ingresos y Estudio</div>
         <div class="drawer-item" onclick="switchTab('horario')"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Horario</div>
+        <div class="drawer-item" onclick="showWelcome(true)"><svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9.5 16.5 14.5 18 22 12 18 6 22 7.5 14.5 2 9.5 9 9"></polygon></svg>Resumen del día</div>
         <button id="pwa-install-btn">📲 Instalar Aplicación</button>
       </nav>
     </aside>
@@ -178,6 +242,7 @@
       </section>
 
       <section id="tab-clases" class="tab-content active">
+        <div id="alerts"></div>
         <div id="month-label"></div>
         <div class="calendar-strip" id="calendar-strip"></div>
         <div class="card">
@@ -217,6 +282,11 @@
 
       <!-- TAB 3: INGRESOS Y ESTUDIO -->
       <section id="tab-ingresos" class="tab-content">
+        <div class="card">
+          <h2>🎯 Meta del mes</h2>
+          <div class="form-group"><label>¿Cuánto quieres ingresar con clases este mes? ($)</label><input type="number" id="goal-input" min="0" step="10000" inputmode="numeric" /></div>
+          <button class="btn-primary" id="goal-save">Guardar meta</button>
+        </div>
         <h2 style="margin-bottom:12px;">Estudio de Ingresos</h2>
         <div class="chip-row" id="period-chips">
           <div class="chip" data-p="hoy">Hoy</div>
@@ -260,6 +330,50 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // ---------- MOTOR DE AUDIO (SINTETIZADOR WEB AUDIO API) ----------
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'enter') {
+        // Tono suave ascendente (Entrar a la app / abrir)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(520, now + 0.15);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'close') {
+        // Tono descendente suave (Cerrar ventanas o drawer)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'tab') {
+        // Click corto (Navegar / Desplazarse por pestañas)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(480, now + 0.05);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyBWUHXgcCSrWtqUKGXk9pwxu3Ui8e92-kk",
       authDomain: "class-v2-4bd36.firebaseapp.com",
@@ -293,11 +407,19 @@
     window.addEventListener('load', () => {
       updateOnlineStatus();
       buildCalendarStrip(true); initSchedule();
-      setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 2000);
+      setTimeout(() => {
+        document.getElementById('splash-screen').classList.add('hidden');
+        playSound('enter'); // Sonido al terminar la pantalla de carga / entrar a la web
+      }, 2000);
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
     });
 
-    // ---------- Calendario (mes completo, sincronizado con el teléfono) ----------
+    // Activar contexto de sonido con la primera interacción del usuario
+    window.addEventListener('click', () => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }, { once: true });
+
+    // ---------- Calendario (mes completo) ----------
     const pad = n => String(n).padStart(2, '0');
     const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const DAY_START = 6 * 60, DAY_END = 22 * 60;
@@ -315,7 +437,7 @@
       const allPill = document.createElement('div');
       allPill.className = 'day-pill' + (selectedDateFilter === null ? ' active' : '');
       allPill.innerHTML = `<div class="day-name">TODOS</div><div class="day-number">∞</div>`;
-      allPill.onclick = () => { selectedDateFilter = null; updateActiveCalendarPill(allPill); renderApp(); };
+      allPill.onclick = () => { playSound('tab'); selectedDateFilter = null; updateActiveCalendarPill(allPill); renderApp(); };
       strip.appendChild(allPill);
 
       const last = new Date(y, m + 1, 0).getDate();
@@ -325,7 +447,7 @@
         pill.dataset.d = isoDate;
         pill.className = `day-pill ${selectedDateFilter === isoDate ? 'active' : ''} ${isoDate === todayISO ? 'today' : ''}`;
         pill.innerHTML = `<div class="day-name">${date.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', '')}</div><div class="day-number">${d}</div>`;
-        pill.onclick = () => { selectedDateFilter = isoDate; updateActiveCalendarPill(pill); updateFormDateInput(isoDate); renderApp(); };
+        pill.onclick = () => { playSound('tab'); selectedDateFilter = isoDate; updateActiveCalendarPill(pill); updateFormDateInput(isoDate); renderApp(); };
         strip.appendChild(pill);
       }
       const act = strip.querySelector('.day-pill.active');
@@ -351,7 +473,7 @@
     const toMin = dt => { const [h, m] = (dt.split('T')[1] || '00:00').split(':').map(Number); return h * 60 + m; };
     function conflictsFor(dt, hours) {
       const day = dt.split('T')[0], s = toMin(dt), e = s + hours * 60;
-      return currentClasses.filter(c => dayOf(c) === day && toMin(c.classDate) < e && s < toMin(c.classDate) + c.hours * 60);
+      return currentClasses.filter(c => !c.cancelled && dayOf(c) === day && toMin(c.classDate) < e && s < toMin(c.classDate) + c.hours * 60);
     }
     function buildDates(dt) {
       const [d, t] = dt.split('T'), [y, m, dd] = d.split('-').map(Number);
@@ -372,7 +494,10 @@
       document.getElementById('repeat-custom').style.display = mode === 'custom' ? 'block' : 'none';
       updateRepeatHint();
     }
-    document.getElementById('repeat-chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) setRepeat(c.dataset.r); });
+    document.getElementById('repeat-chips').addEventListener('click', e => { 
+      const c = e.target.closest('.chip'); 
+      if (c) { playSound('tab'); setRepeat(c.dataset.r); }
+    });
     document.getElementById('repeat-count').addEventListener('input', updateRepeatHint);
     document.getElementById('class-date').addEventListener('input', updateRepeatHint);
 
@@ -380,7 +505,7 @@
     const hh = m => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
     const hs = m => `${Math.floor(m / 60)}${m % 60 ? ':' + pad(m % 60) : ''}`;
     function dayClasses(day) {
-      return currentClasses.filter(c => dayOf(c) === day).map(c => ({ c, s: toMin(c.classDate), e: toMin(c.classDate) + c.hours * 60 })).sort((a, b) => a.s - b.s);
+      return currentClasses.filter(c => dayOf(c) === day && !c.cancelled).map(c => ({ c, s: toMin(c.classDate), e: toMin(c.classDate) + c.hours * 60 })).sort((a, b) => a.s - b.s);
     }
     function busyMerged(list) {
       const out = [];
@@ -425,6 +550,7 @@
         ${free.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;margin-bottom:10px;">Día completo, sin intervalos libres.</p>'}
         <button class="btn-primary" id="sched-add" style="margin-top:8px;">Agendar en este día</button>`;
       document.getElementById('sched-add').onclick = () => {
+        playSound('tab');
         const t = free.length ? hh(free[0].s) : '08:00';
         document.getElementById('class-date').value = `${schedDay}T${t}`;
         selectedDateFilter = schedDay;
@@ -434,9 +560,11 @@
     function initSchedule() {
       document.getElementById('sched-grid').addEventListener('click', e => {
         const c = e.target.closest('.sg-cell[data-d]'); if (!c) return;
+        playSound('tab');
         schedDay = c.dataset.d; renderSchedule();
       });
       const go = delta => {
+        playSound('tab');
         schedMonth = new Date(schedMonth.getFullYear(), schedMonth.getMonth() + delta, 1);
         const n = new Date();
         schedDay = (schedMonth.getFullYear() === n.getFullYear() && schedMonth.getMonth() === n.getMonth()) ? iso(n) : iso(schedMonth);
@@ -460,6 +588,7 @@
     onSnapshot(query(clasesRef, orderBy("classDate", "desc")), (snapshot) => {
       currentClasses = [];
       snapshot.forEach(d => currentClasses.push({ id: d.id, ...d.data() }));
+      classesLoaded = true;
       renderApp();
     });
 
@@ -494,9 +623,23 @@
       } catch (err) { console.error(err); }
     });
 
-    window.toggleCheck = async (id, status) => { await updateDoc(doc(db, "clases", id), { completed: !status }); };
-    window.deleteClass = async (id) => { if (confirm('¿Eliminar esta clase?')) await deleteDoc(doc(db, "clases", id)); };
-    window.deleteClient = async (id) => { if (confirm('¿Eliminar este cliente? Sus clases anteriores se conservan.')) await deleteDoc(doc(db, "clientes", id)); };
+    window.toggleCheck = async (id, status) => {
+      const c = currentClasses.find(x => x.id === id);
+      if (!status && c) { justDone.add(id); celebrate(c.hours * c.hourlyRate); }
+      await updateDoc(doc(db, "clases", id), { completed: !status, cancelled: false });
+    };
+    window.deleteClass = async (id) => { 
+      if (confirm('¿Eliminar esta clase?')) {
+        playSound('close');
+        await deleteDoc(doc(db, "clases", id));
+      }
+    };
+    window.deleteClient = async (id) => { 
+      if (confirm('¿Eliminar este cliente? Sus clases anteriores se conservan.')) {
+        playSound('close');
+        await deleteDoc(doc(db, "clientes", id));
+      }
+    };
 
     // ---------- Render clientes ----------
     function renderClients() {
@@ -535,10 +678,10 @@
       filtered.forEach(item => {
         const cost = item.hours * item.hourlyRate;
         const card = document.createElement('div');
-        card.className = `class-card ${item.completed ? 'completed' : ''}`;
+        card.className = `class-card ${item.completed ? 'completed' : ''} ${item.cancelled ? 'cancelled' : ''} ${justDone.has(item.id) ? 'just-done' : ''}`;
         const dateStr = new Date(item.classDate).toLocaleDateString('es-CO', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         card.innerHTML = `
-          <div class="class-info"><h3>${esc(item.clienteName)}</h3><p>${dateStr} - ${item.hours}h x ${money(item.hourlyRate)}</p></div>
+          <div class="class-info"><h3>${esc(item.clienteName)}</h3><p>${dateStr} - ${item.hours}h x ${money(item.hourlyRate)}</p><p class="ts" data-ts="${esc(item.id)}"></p></div>
           <div class="action-buttons">
             <span style="font-weight:800;color:var(--accent-green);">${money(cost)}</span>
             <button class="check-btn ${item.completed ? 'active' : ''}" onclick="toggleCheck('${esc(item.id)}', ${!!item.completed})">${item.completed ? 'Lista' : 'Check'}</button>
@@ -549,7 +692,7 @@
 
       document.getElementById('total-hours').innerText = fmtH(totalHours);
       document.getElementById('total-earnings').innerText = money(totalEarnings);
-      renderIncome(); renderSchedule();
+      renderIncome(); renderSchedule(); renderAlerts(); scheduleReminders(); maybeDailyNotify(); tickStatus(); justDone.clear(); maybeShowWelcome(); checkEnded();
     }
 
     // ---------- ESTUDIO DE INGRESOS ----------
@@ -570,7 +713,7 @@
       const base = currentClasses.filter(c => !incClient || c.clientId === incClient);
       const scope = base.filter(c => inPeriod(c, incPeriod));
       const done = scope.filter(c => c.completed);
-      const pend = scope.filter(c => !c.completed);
+      const pend = scope.filter(c => !c.completed && !c.cancelled);
       const cost = (c) => c.hours * c.hourlyRate;
       const income = done.reduce((s, c) => s + cost(c), 0);
       const hours = done.reduce((s, c) => s + c.hours, 0);
@@ -585,7 +728,6 @@
         <div class="kpi"><label>Por cobrar (agendado)</label><b>${money(pendMoney)}</b></div>
         <div class="kpi"><label>Horas pendientes</label><b>${fmtH(pendHours)}</b></div>`;
 
-      // Agrupar por cliente
       const byClient = {};
       done.forEach(c => {
         const k = c.clientId || c.clienteName;
@@ -595,7 +737,6 @@
       });
       const rows = Object.values(byClient).sort((a, b) => b.income - a.income);
 
-      // Agrupar por día y día de semana
       const byDay = {}, byWeekday = {};
       done.forEach(c => {
         const d = dayOf(c) || 'Sin fecha';
@@ -603,7 +744,6 @@
         if (dayOf(c)) { const w = new Date(dayOf(c) + 'T00:00').getDay(); byWeekday[w] = (byWeekday[w] || 0) + cost(c); }
       });
 
-      // Insights inteligentes
       const ins = [];
       if (rows.length) {
         const t = rows[0];
@@ -628,7 +768,6 @@
       }
       document.getElementById('insights').innerHTML = ins.map(t => `<div class="insight">${t}</div>`).join('');
 
-      // Ranking por cliente
       const cs = document.getElementById('client-stats');
       cs.innerHTML = rows.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;text-align:center;">Sin clases completadas en este período.</p>';
       const max = rows.length ? rows[0].income : 1;
@@ -642,7 +781,6 @@
         cs.appendChild(el);
       });
 
-      // Desglose por fecha
       const ib = document.getElementById('income-breakdown');
       const days = Object.keys(byDay).sort().reverse();
       ib.innerHTML = days.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;text-align:center;">Sin ingresos registrados.</p>';
@@ -657,17 +795,295 @@
 
     document.getElementById('period-chips').addEventListener('click', (e) => {
       const chip = e.target.closest('.chip'); if (!chip) return;
+      playSound('tab');
       incPeriod = chip.dataset.p;
       document.querySelectorAll('#period-chips .chip').forEach(c => c.classList.toggle('active', c === chip));
       renderIncome();
     });
     document.getElementById('income-client-filter').addEventListener('change', (e) => { incClient = e.target.value; renderIncome(); });
 
+    // ---------- AVISOS INTELIGENTES Y NOTIFICACIONES ----------
+    let classesLoaded = false, reminderTimers = [];
+    const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+    const notifOn = () => 'Notification' in window && Notification.permission === 'granted' && ls('cm_notif') !== 'off';
+    const startOf = c => new Date(c.classDate);
+    const endOf = c => new Date(startOf(c).getTime() + c.hours * 3600000);
+    const hmLabel = c => startOf(c).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    const topClient = list => {
+      const m = {};
+      list.forEach(c => { const k = c.clientId || c.clienteName; const o = m[k] || (m[k] = { id: k, name: c.clienteName, inc: 0, h: 0 }); o.inc += c.hours * c.hourlyRate; o.h += c.hours; });
+      return Object.values(m).sort((a, b) => b.inc - a.inc)[0];
+    };
+
+    function buildAlerts() {
+      const now = new Date(), today = iso(now), out = [];
+      const todays = currentClasses.filter(c => dayOf(c) === today).sort((a, b) => a.classDate.localeCompare(b.classDate));
+      out.push({ k: 'hoy', i: '📅', h: 'Hoy', t: todays.length ? `tienes ${todays.length} clase${todays.length > 1 ? 's' : ''}: ${todays.map(c => `${c.clienteName}${hmLabel(c)}`).join(', ')}.` : 'no tienes clases agendadas.' });
+
+      const nxt = currentClasses.filter(c => !c.completed && !c.cancelled && startOf(c) > now).sort((a, b) => a.classDate.localeCompare(b.classDate))[0];
+      if (nxt) {
+        const mins = Math.round((startOf(nxt) - now) / 60000), same = dayOf(nxt) === today;
+        if (!same || mins <= 120) out.push({ k: 'prox', i: '⏰', h: 'Próxima clase', t: same
+          ? (mins < 60 ? `${nxt.clienteName} en ${mins} min (${hmLabel(nxt)}).` : `${nxt.clienteName} hoy a las ${hmLabel(nxt)}.`)
+          : `${nxt.clienteName}, ${startOf(nxt).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${hmLabel(nxt)}.` });
+      }
+
+      const past = currentClasses.filter(c => !c.completed && !c.cancelled && endOf(c) < now);
+      if (past.length) out.push({ k: 'sin', i: '✅', h: 'Sin marcar', t: `${past.length} clase${past.length > 1 ? 's' : ''} ya pasaron y no están en "Lista" (${fmtH(past.reduce((s, c) => s + c.hours, 0))}). Márcalas para que cuenten en tus ingresos.` });
+
+      const all = currentClasses.filter(c => c.completed);
+      const month = all.filter(c => dayOf(c).slice(0, 7) === today.slice(0, 7));
+      const best = topClient(all);
+      const tm = topClient(month);
+      if (tm) {
+        const tot = month.reduce((s, c) => s + c.hours * c.hourlyRate, 0);
+        out.push({ k: 'mejor', i: '🏆', h: 'Mejor cliente', t: `${tm.name} lidera ${MESES[now.getMonth()]}: ${money(tm.inc)} en ${fmtH(tm.h)} (${tot ? Math.round(tm.inc / tot * 100) : 0}% del mes).` });
+      } else if (best) {
+        out.push({ k: 'mejor', i: '🏆', h: 'Mejor cliente', t: `${best.name} es tu mejor cliente: ${money(best.inc)} en ${fmtH(best.h)}.` });
+      }
+
+      const lim = new Date(now.getTime() + 14 * 864e5), g = {};
+      currentClasses.filter(c => !c.completed && !c.cancelled && startOf(c) > now && startOf(c) <= lim).forEach(c => {
+        const k = c.clientId || c.clienteName; (g[k] || (g[k] = { id: k, name: c.clienteName, n: 0 })).n++;
+      });
+      const up = Object.values(g).sort((a, b) => b.n - a.n);
+      if (up.length) out.push({ k: 'sem', i: '🗓️', h: 'Próximas 2 semanas', t: up.map(u => `${best && u.id === best.id ? '⭐ ' : ''}${u.name} (${u.n})`).join(', ') + (best && up.some(u => u.id === best.id) ? '. ⭐ = tu mejor cliente.' : '.') });
+      return out;
+    }
+    function renderAlerts() {
+      const box = document.getElementById('alerts'); if (!box) return;
+      box.innerHTML = classesLoaded ? buildAlerts().map(a => `<div class="insight">${a.i} <b>${esc(a.h)}:</b> ${esc(a.t)}</div>`).join('') : '';
+    }
+
+    async function notify(title, body, tag) {
+      if (!notifOn()) return;
+      try {
+        const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+        const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
+        if (reg) await reg.showNotification(title, opts); else new Notification(title, opts);
+      } catch (e) { console.log('Notif error:', e); }
+    }
+    function maybeDailyNotify() {
+      if (!classesLoaded || !notifOn()) return;
+      const today = iso(new Date()); if (ls('cm_notif_day') === today) return;
+      ls('cm_notif_day', today);
+      const a = buildAlerts().filter(x => ['hoy', 'sin', 'mejor', 'sem'].includes(x.k));
+      notify('ClassManager · Resumen de hoy', a.map(x => `${x.h}: ${x.t}`).join('\n'), 'daily');
+    }
+    function scheduleReminders() {
+      reminderTimers.forEach(clearTimeout); reminderTimers = [];
+      if (!classesLoaded || !notifOn()) return;
+      const now = Date.now();
+      currentClasses.forEach(c => {
+        if (c.completed || c.cancelled) return;
+        const me = endOf(c).getTime() - now;
+        if (me > 0 && me < 24 * 3600000) reminderTimers.push(setTimeout(() => notify('¿Ya cumpliste la clase?', `${c.clienteName} ya terminó. Ábrela para marcarla.`, 'e-' + c.id), me));
+        const ms = startOf(c).getTime() - 15 * 60000 - now;
+        if (ms > 0 && ms < 24 * 3600000) reminderTimers.push(setTimeout(() => notify('Clase en 15 minutos', `${c.clienteName} · ${hmLabel(c)} (${fmtH(c.hours)})`, 'c-' + c.id), ms));
+      });
+    }
+    function updateBell() { document.getElementById('bell-btn').classList.toggle('on', notifOn()); }
+    document.getElementById('bell-btn').addEventListener('click', async () => {
+      playSound('tab');
+      if (!('Notification' in window)) { alert('Este navegador no soporta notificaciones.'); return; }
+      if (Notification.permission === 'denied') { alert('Las notificaciones están bloqueadas. Actívalas en los ajustes del navegador o de la app para este sitio.'); return; }
+      if (Notification.permission === 'default') {
+        if (await Notification.requestPermission() !== 'granted') { updateBell(); return; }
+        ls('cm_notif', 'on');
+      } else {
+        ls('cm_notif', notifOn() ? 'off' : 'on');
+      }
+      ls('cm_notif_day', '');
+      updateBell(); scheduleReminders(); maybeDailyNotify();
+    });
+    updateBell();
+    setInterval(renderAlerts, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { tickStatus(); checkEnded(); renderAlerts(); scheduleReminders(); maybeDailyNotify(); } });
+
+    // ---------- ESTADO EN VIVO Y CELEBRACIÓN ----------
+    const justDone = new Set(), snooze = {};
+    let askingId = null;
+    const dur = ms => { const m = Math.max(1, Math.round(ms / 60000)), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = m % 60; return d ? `${d}d ${h}h` : h ? `${h}h ${mm}m` : `${mm} min`; };
+    const endLabel = c => endOf(c).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+    function timeLabel(c) {
+      if (c.cancelled) return { t: 'Cancelada', k: 'cancel' };
+      if (c.completed) return { t: '✓ Completada', k: 'done' };
+      const now = Date.now(), s = startOf(c).getTime(), e = endOf(c).getTime();
+      if (now < s) return { t: `Empieza en ${dur(s - now)}`, k: 'soon' };
+      if (now < e) return { t: `● En curso · faltan ${dur(e - now)}`, k: 'live' };
+      return { t: `Terminó hace ${dur(now - e)} · ¿cumplida?`, k: 'ended' };
+    }
+    function tickStatus() {
+      document.querySelectorAll('[data-ts]').forEach(el => {
+        const c = currentClasses.find(x => x.id === el.dataset.ts); if (!c) return;
+        const l = timeLabel(c);
+        el.textContent = l.t; el.className = 'ts ' + l.k;
+        el.closest('.class-card')?.classList.toggle('live', l.k === 'live');
+      });
+    }
+
+    function celebrate(amount) {
+      navigator.vibrate?.(40);
+      const el = document.createElement('div'); el.className = 'celebrate';
+      let conf = '';
+      for (let i = 0; i < 16; i++) { const a = i / 16 * 2 * Math.PI, r = 90 + Math.random() * 60; conf += `<i style="--x:${Math.cos(a) * r}px;--y:${Math.sin(a) * r}px;--c:${i % 2 ? 'var(--accent-orange)' : 'var(--accent-green)'};--d:${(Math.random() * .15).toFixed(2)}s"></i>`; }
+      el.innerHTML = `<div class="cel-ring"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23"/><path d="M15 27l8 8 14-16"/></svg>${conf}</div><div class="cel-money">+${money(amount)}</div>`;
+      document.body.appendChild(el); setTimeout(() => el.remove(), 2000);
+    }
+
+    function checkEnded() {
+      if (!classesLoaded || askingId || welcomeOpen) return;
+      if (document.getElementById('success-modal').classList.contains('active')) return;
+      const now = Date.now();
+      const c = currentClasses.filter(x => !x.completed && !x.cancelled && endOf(x) <= now && now - endOf(x) < 72 * 3600000 && (snooze[x.id] || 0) < now)
+        .sort((a, b) => a.classDate.localeCompare(b.classDate))[0];
+      if (!c) return;
+      askingId = c.id;
+      playSound('enter'); // Sonido de apertura para la modal de aviso
+      const when = dayOf(c) === iso(new Date()) ? 'hoy' : startOf(c).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' });
+      document.getElementById('ended-text').innerHTML = `<b style="color:var(--text-main)">${esc(c.clienteName)}</b><br>${when}, ${hmLabel(c)} – ${endLabel(c)} (${fmtH(c.hours)}) · ${money(c.hours * c.hourlyRate)}<br>Terminó hace ${dur(now - endOf(c).getTime())}.`;
+      document.getElementById('ended-modal').classList.add('active');
+    }
+    function closeAsk(next = 500) { 
+      playSound('close');
+      document.getElementById('ended-modal').classList.remove('active'); 
+      askingId = null; 
+      setTimeout(checkEnded, next); 
+    }
+    document.getElementById('ended-yes').onclick = async () => {
+      const c = currentClasses.find(x => x.id === askingId); if (!c) return closeAsk();
+      justDone.add(c.id); celebrate(c.hours * c.hourlyRate);
+      const id = c.id; closeAsk(2300);
+      await updateDoc(doc(db, "clases", id), { completed: true, cancelled: false });
+    };
+    document.getElementById('ended-later').onclick = () => { snooze[askingId] = Date.now() + 15 * 60000; closeAsk(); };
+    document.getElementById('ended-cancel').onclick = async () => {
+      const id = askingId; closeAsk();
+      await updateDoc(doc(db, "clases", id), { cancelled: true, completed: false });
+    };
+    setInterval(() => { tickStatus(); checkEnded(); }, 20000);
+
+    // ---------- VENTANAS DE BIENVENIDA ----------
+    let welcomeOpen = false, welcomePending = false, wSlides = [], wIdx = 0;
+    const weekStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+    const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    const dayWord = (c) => {
+      const d = dayOf(c), t = new Date();
+      if (d === iso(t)) return 'hoy'; if (d === iso(addDays(t, 1))) return 'mañana';
+      return startOf(c).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric' });
+    };
+    const WD = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const cost = (c) => c.hours * c.hourlyRate;
+
+    function weekRecap(force) {
+      const now = new Date(), cur = weekStart(now), prev = addDays(cur, -7), key = iso(cur);
+      if (!force && ls('cm_week_seen') === key) return null;
+      const inW = (st) => { const a = iso(st), b = iso(addDays(st, 6)); return currentClasses.filter(c => c.completed && dayOf(c) >= a && dayOf(c) <= b); };
+      const w = inW(prev); if (!w.length) return null;
+      if (!force) ls('cm_week_seen', key);
+      const inc = sumCost(w), hrs = w.reduce((s, c) => s + c.hours, 0), best = topClient(w), pInc = sumCost(inW(addDays(prev, -7)));
+      const byWd = {}; w.forEach(c => { const d = new Date(dayOf(c) + 'T00:00').getDay(); byWd[d] = (byWd[d] || 0) + cost(c); });
+      const bd = Object.keys(byWd).sort((a, b) => byWd[b] - byWd[a])[0];
+      const a = iso(now), b = iso(addDays(cur, 6));
+      const next = currentClasses.filter(c => !c.completed && !c.cancelled && dayOf(c) >= a && dayOf(c) <= b && startOf(c) > now).sort((x, y) => x.classDate.localeCompare(y.classDate));
+      const fmt = (d) => d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+      const cmp = pInc > 0 ? ` · ${inc >= pInc ? '+' : ''}${Math.round((inc - pInc) / pInc * 100)}% vs la anterior` : '';
+      return { e: '🏁', t: 'Cerraste la semana', h: `<p class="wl-sub">Del ${fmt(prev)} al ${fmt(addDays(prev, 6))}${cmp}</p>
+        <div class="wl-stat"><div><b>${w.length}</b><span>Clases</span></div><div><b>${fmtH(hrs)}</b><span>Dictadas</span></div><div style="grid-column:span 2"><b>${money(inc)}</b><span>Ingresos de la semana</span></div></div>
+        <p class="wl-sub" style="margin-top:14px">🏆 Tu mejor cliente fue <b style="color:#fff">${esc(best.name)}</b> (${money(best.inc)}).${bd !== undefined ? `<br>📅 Tu mejor día fue el <b style="color:#fff">${WD[bd]}</b>.` : ''}</p>
+        <p class="wl-sub" style="margin-top:10px">${next.length ? `Prepárate: esta semana aún tienes <b style="color:#fff">${next.length}</b> clase${next.length > 1 ? 's' : ''}, la próxima con <b style="color:#fff">${esc(next[0].clienteName)}</b> ${dayWord(next[0])} a las${hmLabel(next[0])}.` : 'Prepárate: aún no tienes clases agendadas esta semana, ¡agenda las siguientes!'}</p>` };
+    }
+    const sumCost = (a) => a.reduce((s, c) => s + cost(c), 0);
+
+    function buildSlides(force) {
+      const now = new Date(), today = iso(now), out = [];
+      const todays = currentClasses.filter(c => dayOf(c) === today && !c.cancelled).sort((a, b) => a.classDate.localeCompare(b.classDate));
+      out.push(todays.length
+        ? { e: '📅', t: 'Hoy tenemos…', h: `<p class="wl-sub">${todays.length} clase${todays.length > 1 ? 's' : ''} · ${fmtH(todays.reduce((s, c) => s + c.hours, 0))} · ${money(sumCost(todays))}</p><div class="wl-list">${todays.slice(0, 6).map(c => `<div class="wl-item ${c.completed ? 'done' : ''}"><span>${hmLabel(c)} ·${esc(c.clienteName)}</span><small>${fmtH(c.hours)}${c.completed ? ' ✓' : ''}</small></div>`).join('')}${todays.length > 6 ? `<p class="wl-sub">+${todays.length - 6} más</p>` : ''}</div>` }
+        : { e: '🌿', t: 'Hoy tienes el día libre', h: '<p class="wl-sub">No tienes clases agendadas hoy. Buen momento para planear la semana o descansar.</p>' });
+
+      const lim = addDays(now, 7), seen = {};
+      const up = currentClasses.filter(c => !c.completed && !c.cancelled && startOf(c) > now && startOf(c) <= lim).sort((a, b) => a.classDate.localeCompare(b.classDate))
+        .filter(c => { const k = c.clientId || c.clienteName; if (seen[k]) return false; seen[k] = 1; return true; }).slice(0, 4);
+      if (up.length) out.push({ e: '⏰', t: 'Prepárate, pronto tendrás clases con…', h: `<div class="wl-list">${up.map(c => `<div class="wl-item"><span>${esc(c.clienteName)}</span><small>${dayWord(c)} ·${hmLabel(c)}</small></div>`).join('')}</div>` });
+
+      const done = currentClasses.filter(c => c.completed && dayOf(c).slice(0, 7) === today.slice(0, 7)), inc = sumCost(done);
+      const pend = currentClasses.filter(c => !c.completed && !c.cancelled && startOf(c) > now && dayOf(c).slice(0, 7) === today.slice(0, 7)), pInc = sumCost(pend);
+      const goal = parseFloat(ls('cm_goal')) || 0;
+      let g;
+      if (goal > 0) {
+        const left = Math.max(0, goal - inc), pct = Math.min(100, inc / goal * 100), avg = done.length ? inc / done.length : (pend.length ? pInc / pend.length : 0);
+        g = `<p class="wl-sub">Has completado <b style="color:#fff">${done.length}</b> clase${done.length === 1 ? '' : 's'} en ${MESES[now.getMonth()]} (${money(inc)}).</p><div class="wl-bar"><div style="width:${pct}%"></div></div>
+          <p class="wl-sub">${left > 0 ? `Te faltan <b style="color:var(--accent-orange)">${money(left)}</b> para tu meta de ${money(goal)}${avg ? ` (≈ ${Math.ceil(left / avg)} clases más)` : ''}.` : '🎉 ¡Ya cumpliste tu meta del mes!'}${left > 0 && pInc > 0 ? `<br>Con lo agendado sumarías ${money(pInc)}${inc + pInc >= goal ? ' y la alcanzas ✅' : `; aún faltarían ${money(goal - inc - pInc)}`}.` : ''}</p>`;
+      } else {
+        g = `<p class="wl-sub">Has completado <b style="color:#fff">${done.length}</b> clase${done.length === 1 ? '' : 's'} este mes (${money(inc)})${pInc ? ` y tienes ${money(pInc)} agendados` : ''}.</p><p class="wl-sub" style="margin-top:10px">Define una meta mensual y te diré cuánto te falta.</p><button class="btn-ghost" onclick="goGoal()">Definir mi meta</button>`;
+      }
+      out.push({ e: goal > 0 && inc >= goal ? '🏆' : '📈', t: goal > 0 ? 'Vas rumbo a tu meta' : 'Tu avance del mes', h: g });
+
+      const wk = weekRecap(force); if (wk) out.push(wk);
+      return out;
+    }
+
+    function renderSlide() {
+      const sl = wSlides[wIdx], body = document.getElementById('wl-body');
+      document.getElementById('wl-dots').innerHTML = wSlides.map((_, i) => `<i class="${i <= wIdx ? 'on' : ''}"></i>`).join('');
+      body.style.animation = 'none'; void body.offsetWidth; body.style.animation = '';
+      body.innerHTML = `<div class="wl-big">${sl.e}</div><h3 style="font-size:1.2rem;margin-bottom:8px;">${sl.t}</h3>${sl.h}`;
+      document.getElementById('wl-next').textContent = wIdx === wSlides.length - 1 ? '¡A trabajar!' : 'Siguiente';
+      document.getElementById('wl-skip').style.display = wIdx === wSlides.length - 1 ? 'none' : 'block';
+    }
+    window.showWelcome = (force) => {
+      if (welcomeOpen || !classesLoaded) return;
+      playSound('enter'); // Sonido al abrir la modal de bienvenida
+      if (!force) ls('cm_welcome_day', iso(new Date()));
+      wSlides = buildSlides(!!force); wIdx = 0; welcomeOpen = true;
+      document.getElementById('welcome-modal').classList.add('active'); renderSlide();
+      try { closeDrawer(); } catch (e) {}
+    };
+    function closeWelcome() { 
+      playSound('close'); // Sonido al cerrar la modal de bienvenida
+      document.getElementById('welcome-modal').classList.remove('active'); 
+      welcomeOpen = false; 
+      setTimeout(checkEnded, 500); 
+    }
+    document.getElementById('wl-next').onclick = () => { 
+      if (wIdx < wSlides.length - 1) { 
+        playSound('tab'); 
+        wIdx++; 
+        renderSlide(); 
+      } else closeWelcome(); 
+    };
+    document.getElementById('wl-skip').onclick = closeWelcome;
+    window.goGoal = () => { closeWelcome(); switchTab('ingresos'); setTimeout(() => document.getElementById('goal-input')?.focus(), 350); };
+    function maybeShowWelcome() {
+      if (welcomePending || !classesLoaded) return;
+      welcomePending = true;
+      const go = () => {
+        if (!document.getElementById('splash-screen').classList.contains('hidden')) return setTimeout(go, 600);
+        if (ls('cm_welcome_day') !== iso(new Date())) showWelcome(false);
+      };
+      go();
+    }
+    document.getElementById('goal-input').value = ls('cm_goal') || '';
+    document.getElementById('goal-save').onclick = () => {
+      playSound('tab');
+      const v = parseFloat(document.getElementById('goal-input').value) || 0;
+      ls('cm_goal', String(v)); alert(v > 0 ? `Meta guardada: ${money(v)}` : 'Meta eliminada');
+    };
+
     // ---------- UI general ----------
-    function showSuccessModal() { document.getElementById('success-modal').classList.add('active'); }
-    window.closeSuccessModal = () => document.getElementById('success-modal').classList.remove('active');
+    function showSuccessModal() { 
+      playSound('enter'); 
+      document.getElementById('success-modal').classList.add('active'); 
+    }
+    window.closeSuccessModal = () => {
+      playSound('close');
+      document.getElementById('success-modal').classList.remove('active');
+    };
 
     window.switchTab = (tabName) => {
+      playSound('tab'); // Sonido al cambiar de pestaña
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-button').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
@@ -679,14 +1095,23 @@
     const menuBtn = document.getElementById('menu-btn');
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('drawer-overlay');
-    menuBtn.addEventListener('click', () => { drawer.classList.add('active'); overlay.classList.add('active'); });
+    menuBtn.addEventListener('click', () => { 
+      playSound('enter'); // Sonido al abrir menú desplegable
+      drawer.classList.add('active'); 
+      overlay.classList.add('active'); 
+    });
     overlay.addEventListener('click', closeDrawer);
-    function closeDrawer() { drawer.classList.remove('active'); overlay.classList.remove('active'); }
+    function closeDrawer() { 
+      if (drawer.classList.contains('active')) playSound('close'); // Sonido al cerrar menú
+      drawer.classList.remove('active'); 
+      overlay.classList.remove('active'); 
+    }
 
     let deferredPrompt;
     const installBtn = document.getElementById('pwa-install-btn');
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'block'; });
     installBtn.addEventListener('click', () => {
+      playSound('tab');
       if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { installBtn.style.display = 'none'; }); }
     });
   </script>
