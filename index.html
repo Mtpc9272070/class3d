@@ -68,6 +68,7 @@
     .check-btn.active{background:var(--accent-green);color:#000}
     .delete-btn{background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.3);color:var(--accent-red);width:32px;height:32px;border-radius:50%;cursor:pointer;display:grid;place-items:center}
     .income-group{background:var(--card-bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
+    /* NUEVO: ANALÍTICA DE INGRESOS */
     .chip-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
     .chip-row::-webkit-scrollbar{display:none}
     .chip{flex-shrink:0;padding:9px 16px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:20px;color:var(--text-muted);font-size:.8rem;font-weight:700;cursor:pointer}
@@ -167,7 +168,7 @@
   </style>
 </head>
 <body>
-  <div id="offline-banner">⚠️️ Modo Sin Conexión a Internet</div>
+  <div id="offline-banner">⚠️ Modo Sin Conexión a Internet</div>
 
   <div id="splash-screen">
     <div class="splash-logo">
@@ -231,6 +232,7 @@
         <div class="drawer-item" onclick="switchTab('ingresos')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Ingresos y Estudio</div>
         <div class="drawer-item" onclick="switchTab('horario')"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Horario</div>
         <div class="drawer-item" onclick="showWelcome(true)"><svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9.5 16.5 14.5 18 22 12 18 6 22 7.5 14.5 2 9.5 9 9"></polygon></svg>Resumen del día</div>
+        <div class="drawer-item" id="snd-toggle"><svg class="icon" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.5 8.5a5 5 0 0 1 0 7"></path></svg><span id="snd-label">Sonidos: activados</span></div>
         <button id="pwa-install-btn">📲 Instalar Aplicación</button>
       </nav>
     </aside>
@@ -330,50 +332,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // ---------- MOTOR DE AUDIO (SINTETIZADOR WEB AUDIO API) ----------
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playSound(type) {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      const now = audioCtx.currentTime;
-
-      if (type === 'enter') {
-        // Tono suave ascendente (Entrar a la app / abrir)
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.exponentialRampToValueAtTime(520, now + 0.15);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-        osc.start(now);
-        osc.stop(now + 0.15);
-      } else if (type === 'close') {
-        // Tono descendente suave (Cerrar ventanas o drawer)
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-        osc.start(now);
-        osc.stop(now + 0.12);
-      } else if (type === 'tab') {
-        // Click corto (Navegar / Desplazarse por pestañas)
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(480, now + 0.05);
-        gain.gain.setValueAtTime(0.06, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
-      }
-    }
-
     const firebaseConfig = {
       apiKey: "AIzaSyBWUHXgcCSrWtqUKGXk9pwxu3Ui8e92-kk",
       authDomain: "class-v2-4bd36.firebaseapp.com",
@@ -407,19 +365,11 @@
     window.addEventListener('load', () => {
       updateOnlineStatus();
       buildCalendarStrip(true); initSchedule();
-      setTimeout(() => {
-        document.getElementById('splash-screen').classList.add('hidden');
-        playSound('enter'); // Sonido al terminar la pantalla de carga / entrar a la web
-      }, 2000);
+      setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 2000);
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
     });
 
-    // Activar contexto de sonido con la primera interacción del usuario
-    window.addEventListener('click', () => {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true });
-
-    // ---------- Calendario (mes completo) ----------
+    // ---------- Calendario (mes completo, sincronizado con el teléfono) ----------
     const pad = n => String(n).padStart(2, '0');
     const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const DAY_START = 6 * 60, DAY_END = 22 * 60;
@@ -437,7 +387,7 @@
       const allPill = document.createElement('div');
       allPill.className = 'day-pill' + (selectedDateFilter === null ? ' active' : '');
       allPill.innerHTML = `<div class="day-name">TODOS</div><div class="day-number">∞</div>`;
-      allPill.onclick = () => { playSound('tab'); selectedDateFilter = null; updateActiveCalendarPill(allPill); renderApp(); };
+      allPill.onclick = () => { selectedDateFilter = null; updateActiveCalendarPill(allPill); renderApp(); };
       strip.appendChild(allPill);
 
       const last = new Date(y, m + 1, 0).getDate();
@@ -447,7 +397,7 @@
         pill.dataset.d = isoDate;
         pill.className = `day-pill ${selectedDateFilter === isoDate ? 'active' : ''} ${isoDate === todayISO ? 'today' : ''}`;
         pill.innerHTML = `<div class="day-name">${date.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', '')}</div><div class="day-number">${d}</div>`;
-        pill.onclick = () => { playSound('tab'); selectedDateFilter = isoDate; updateActiveCalendarPill(pill); updateFormDateInput(isoDate); renderApp(); };
+        pill.onclick = () => { selectedDateFilter = isoDate; updateActiveCalendarPill(pill); updateFormDateInput(isoDate); renderApp(); };
         strip.appendChild(pill);
       }
       const act = strip.querySelector('.day-pill.active');
@@ -494,10 +444,7 @@
       document.getElementById('repeat-custom').style.display = mode === 'custom' ? 'block' : 'none';
       updateRepeatHint();
     }
-    document.getElementById('repeat-chips').addEventListener('click', e => { 
-      const c = e.target.closest('.chip'); 
-      if (c) { playSound('tab'); setRepeat(c.dataset.r); }
-    });
+    document.getElementById('repeat-chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) setRepeat(c.dataset.r); });
     document.getElementById('repeat-count').addEventListener('input', updateRepeatHint);
     document.getElementById('class-date').addEventListener('input', updateRepeatHint);
 
@@ -550,7 +497,6 @@
         ${free.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;margin-bottom:10px;">Día completo, sin intervalos libres.</p>'}
         <button class="btn-primary" id="sched-add" style="margin-top:8px;">Agendar en este día</button>`;
       document.getElementById('sched-add').onclick = () => {
-        playSound('tab');
         const t = free.length ? hh(free[0].s) : '08:00';
         document.getElementById('class-date').value = `${schedDay}T${t}`;
         selectedDateFilter = schedDay;
@@ -560,11 +506,9 @@
     function initSchedule() {
       document.getElementById('sched-grid').addEventListener('click', e => {
         const c = e.target.closest('.sg-cell[data-d]'); if (!c) return;
-        playSound('tab');
         schedDay = c.dataset.d; renderSchedule();
       });
       const go = delta => {
-        playSound('tab');
         schedMonth = new Date(schedMonth.getFullYear(), schedMonth.getMonth() + delta, 1);
         const n = new Date();
         schedDay = (schedMonth.getFullYear() === n.getFullYear() && schedMonth.getMonth() === n.getMonth()) ? iso(n) : iso(schedMonth);
@@ -628,18 +572,8 @@
       if (!status && c) { justDone.add(id); celebrate(c.hours * c.hourlyRate); }
       await updateDoc(doc(db, "clases", id), { completed: !status, cancelled: false });
     };
-    window.deleteClass = async (id) => { 
-      if (confirm('¿Eliminar esta clase?')) {
-        playSound('close');
-        await deleteDoc(doc(db, "clases", id));
-      }
-    };
-    window.deleteClient = async (id) => { 
-      if (confirm('¿Eliminar este cliente? Sus clases anteriores se conservan.')) {
-        playSound('close');
-        await deleteDoc(doc(db, "clientes", id));
-      }
-    };
+    window.deleteClass = async (id) => { if (confirm('¿Eliminar esta clase?')) await deleteDoc(doc(db, "clases", id)); };
+    window.deleteClient = async (id) => { if (confirm('¿Eliminar este cliente? Sus clases anteriores se conservan.')) await deleteDoc(doc(db, "clientes", id)); };
 
     // ---------- Render clientes ----------
     function renderClients() {
@@ -728,6 +662,7 @@
         <div class="kpi"><label>Por cobrar (agendado)</label><b>${money(pendMoney)}</b></div>
         <div class="kpi"><label>Horas pendientes</label><b>${fmtH(pendHours)}</b></div>`;
 
+      // Agrupar por cliente
       const byClient = {};
       done.forEach(c => {
         const k = c.clientId || c.clienteName;
@@ -737,6 +672,7 @@
       });
       const rows = Object.values(byClient).sort((a, b) => b.income - a.income);
 
+      // Agrupar por día y día de semana
       const byDay = {}, byWeekday = {};
       done.forEach(c => {
         const d = dayOf(c) || 'Sin fecha';
@@ -744,6 +680,7 @@
         if (dayOf(c)) { const w = new Date(dayOf(c) + 'T00:00').getDay(); byWeekday[w] = (byWeekday[w] || 0) + cost(c); }
       });
 
+      // Insights inteligentes
       const ins = [];
       if (rows.length) {
         const t = rows[0];
@@ -768,6 +705,7 @@
       }
       document.getElementById('insights').innerHTML = ins.map(t => `<div class="insight">${t}</div>`).join('');
 
+      // Ranking por cliente
       const cs = document.getElementById('client-stats');
       cs.innerHTML = rows.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;text-align:center;">Sin clases completadas en este período.</p>';
       const max = rows.length ? rows[0].income : 1;
@@ -781,6 +719,7 @@
         cs.appendChild(el);
       });
 
+      // Desglose por fecha
       const ib = document.getElementById('income-breakdown');
       const days = Object.keys(byDay).sort().reverse();
       ib.innerHTML = days.length ? '' : '<p style="color:var(--text-muted);font-size:.85rem;text-align:center;">Sin ingresos registrados.</p>';
@@ -795,14 +734,13 @@
 
     document.getElementById('period-chips').addEventListener('click', (e) => {
       const chip = e.target.closest('.chip'); if (!chip) return;
-      playSound('tab');
       incPeriod = chip.dataset.p;
       document.querySelectorAll('#period-chips .chip').forEach(c => c.classList.toggle('active', c === chip));
       renderIncome();
     });
     document.getElementById('income-client-filter').addEventListener('change', (e) => { incClient = e.target.value; renderIncome(); });
 
-    // ---------- AVISOS INTELIGENTES Y NOTIFICACIONES ----------
+    // ---------- AVISOS INTELIGENTES Y NOTIFICACIONES (nivel 1) ----------
     let classesLoaded = false, reminderTimers = [];
     const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
     const notifOn = () => 'Notification' in window && Notification.permission === 'granted' && ls('cm_notif') !== 'off';
@@ -818,7 +756,7 @@
     function buildAlerts() {
       const now = new Date(), today = iso(now), out = [];
       const todays = currentClasses.filter(c => dayOf(c) === today).sort((a, b) => a.classDate.localeCompare(b.classDate));
-      out.push({ k: 'hoy', i: '📅', h: 'Hoy', t: todays.length ? `tienes ${todays.length} clase${todays.length > 1 ? 's' : ''}: ${todays.map(c => `${c.clienteName}${hmLabel(c)}`).join(', ')}.` : 'no tienes clases agendadas.' });
+      out.push({ k: 'hoy', i: '📅', h: 'Hoy', t: todays.length ? `tienes ${todays.length} clase${todays.length > 1 ? 's' : ''}: ${todays.map(c => `${c.clienteName} ${hmLabel(c)}`).join(', ')}.` : 'no tienes clases agendadas.' });
 
       const nxt = currentClasses.filter(c => !c.completed && !c.cancelled && startOf(c) > now).sort((a, b) => a.classDate.localeCompare(b.classDate))[0];
       if (nxt) {
@@ -857,6 +795,7 @@
 
     async function notify(title, body, tag) {
       if (!notifOn()) return;
+      SFX.play('alert');
       try {
         const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
         const opts = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png' };
@@ -884,7 +823,6 @@
     }
     function updateBell() { document.getElementById('bell-btn').classList.toggle('on', notifOn()); }
     document.getElementById('bell-btn').addEventListener('click', async () => {
-      playSound('tab');
       if (!('Notification' in window)) { alert('Este navegador no soporta notificaciones.'); return; }
       if (Notification.permission === 'denied') { alert('Las notificaciones están bloqueadas. Actívalas en los ajustes del navegador o de la app para este sitio.'); return; }
       if (Notification.permission === 'default') {
@@ -900,7 +838,7 @@
     setInterval(renderAlerts, 60000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { tickStatus(); checkEnded(); renderAlerts(); scheduleReminders(); maybeDailyNotify(); } });
 
-    // ---------- ESTADO EN VIVO Y CELEBRACIÓN ----------
+    // ---------- ESTADO EN VIVO, ANUNCIO "¿YA CUMPLISTE?" Y ANIMACIÓN ----------
     const justDone = new Set(), snooze = {};
     let askingId = null;
     const dur = ms => { const m = Math.max(1, Math.round(ms / 60000)), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = m % 60; return d ? `${d}d ${h}h` : h ? `${h}h ${mm}m` : `${mm} min`; };
@@ -924,7 +862,7 @@
     }
 
     function celebrate(amount) {
-      navigator.vibrate?.(40);
+      navigator.vibrate?.(40); SFX.play('achieve');
       const el = document.createElement('div'); el.className = 'celebrate';
       let conf = '';
       for (let i = 0; i < 16; i++) { const a = i / 16 * 2 * Math.PI, r = 90 + Math.random() * 60; conf += `<i style="--x:${Math.cos(a) * r}px;--y:${Math.sin(a) * r}px;--c:${i % 2 ? 'var(--accent-orange)' : 'var(--accent-green)'};--d:${(Math.random() * .15).toFixed(2)}s"></i>`; }
@@ -940,17 +878,11 @@
         .sort((a, b) => a.classDate.localeCompare(b.classDate))[0];
       if (!c) return;
       askingId = c.id;
-      playSound('enter'); // Sonido de apertura para la modal de aviso
       const when = dayOf(c) === iso(new Date()) ? 'hoy' : startOf(c).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' });
       document.getElementById('ended-text').innerHTML = `<b style="color:var(--text-main)">${esc(c.clienteName)}</b><br>${when}, ${hmLabel(c)} – ${endLabel(c)} (${fmtH(c.hours)}) · ${money(c.hours * c.hourlyRate)}<br>Terminó hace ${dur(now - endOf(c).getTime())}.`;
       document.getElementById('ended-modal').classList.add('active');
     }
-    function closeAsk(next = 500) { 
-      playSound('close');
-      document.getElementById('ended-modal').classList.remove('active'); 
-      askingId = null; 
-      setTimeout(checkEnded, next); 
-    }
+    function closeAsk(next = 500) { document.getElementById('ended-modal').classList.remove('active'); askingId = null; setTimeout(checkEnded, next); }
     document.getElementById('ended-yes').onclick = async () => {
       const c = currentClasses.find(x => x.id === askingId); if (!c) return closeAsk();
       justDone.add(c.id); celebrate(c.hours * c.hourlyRate);
@@ -964,7 +896,7 @@
     };
     setInterval(() => { tickStatus(); checkEnded(); }, 20000);
 
-    // ---------- VENTANAS DE BIENVENIDA ----------
+    // ---------- VENTANAS DE BIENVENIDA (resumen en secuencia) ----------
     let welcomeOpen = false, welcomePending = false, wSlides = [], wIdx = 0;
     const weekStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
     const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
@@ -992,7 +924,7 @@
       return { e: '🏁', t: 'Cerraste la semana', h: `<p class="wl-sub">Del ${fmt(prev)} al ${fmt(addDays(prev, 6))}${cmp}</p>
         <div class="wl-stat"><div><b>${w.length}</b><span>Clases</span></div><div><b>${fmtH(hrs)}</b><span>Dictadas</span></div><div style="grid-column:span 2"><b>${money(inc)}</b><span>Ingresos de la semana</span></div></div>
         <p class="wl-sub" style="margin-top:14px">🏆 Tu mejor cliente fue <b style="color:#fff">${esc(best.name)}</b> (${money(best.inc)}).${bd !== undefined ? `<br>📅 Tu mejor día fue el <b style="color:#fff">${WD[bd]}</b>.` : ''}</p>
-        <p class="wl-sub" style="margin-top:10px">${next.length ? `Prepárate: esta semana aún tienes <b style="color:#fff">${next.length}</b> clase${next.length > 1 ? 's' : ''}, la próxima con <b style="color:#fff">${esc(next[0].clienteName)}</b> ${dayWord(next[0])} a las${hmLabel(next[0])}.` : 'Prepárate: aún no tienes clases agendadas esta semana, ¡agenda las siguientes!'}</p>` };
+        <p class="wl-sub" style="margin-top:10px">${next.length ? `Prepárate: esta semana aún tienes <b style="color:#fff">${next.length}</b> clase${next.length > 1 ? 's' : ''}, la próxima con <b style="color:#fff">${esc(next[0].clienteName)}</b> ${dayWord(next[0])} a las ${hmLabel(next[0])}.` : 'Prepárate: aún no tienes clases agendadas esta semana, ¡agenda las siguientes!'}</p>` };
     }
     const sumCost = (a) => a.reduce((s, c) => s + cost(c), 0);
 
@@ -1000,13 +932,13 @@
       const now = new Date(), today = iso(now), out = [];
       const todays = currentClasses.filter(c => dayOf(c) === today && !c.cancelled).sort((a, b) => a.classDate.localeCompare(b.classDate));
       out.push(todays.length
-        ? { e: '📅', t: 'Hoy tenemos…', h: `<p class="wl-sub">${todays.length} clase${todays.length > 1 ? 's' : ''} · ${fmtH(todays.reduce((s, c) => s + c.hours, 0))} · ${money(sumCost(todays))}</p><div class="wl-list">${todays.slice(0, 6).map(c => `<div class="wl-item ${c.completed ? 'done' : ''}"><span>${hmLabel(c)} ·${esc(c.clienteName)}</span><small>${fmtH(c.hours)}${c.completed ? ' ✓' : ''}</small></div>`).join('')}${todays.length > 6 ? `<p class="wl-sub">+${todays.length - 6} más</p>` : ''}</div>` }
+        ? { e: '📅', t: 'Hoy tenemos…', h: `<p class="wl-sub">${todays.length} clase${todays.length > 1 ? 's' : ''} · ${fmtH(todays.reduce((s, c) => s + c.hours, 0))} · ${money(sumCost(todays))}</p><div class="wl-list">${todays.slice(0, 6).map(c => `<div class="wl-item ${c.completed ? 'done' : ''}"><span>${hmLabel(c)} · ${esc(c.clienteName)}</span><small>${fmtH(c.hours)}${c.completed ? ' ✓' : ''}</small></div>`).join('')}${todays.length > 6 ? `<p class="wl-sub">+${todays.length - 6} más</p>` : ''}</div>` }
         : { e: '🌿', t: 'Hoy tienes el día libre', h: '<p class="wl-sub">No tienes clases agendadas hoy. Buen momento para planear la semana o descansar.</p>' });
 
       const lim = addDays(now, 7), seen = {};
       const up = currentClasses.filter(c => !c.completed && !c.cancelled && startOf(c) > now && startOf(c) <= lim).sort((a, b) => a.classDate.localeCompare(b.classDate))
         .filter(c => { const k = c.clientId || c.clienteName; if (seen[k]) return false; seen[k] = 1; return true; }).slice(0, 4);
-      if (up.length) out.push({ e: '⏰', t: 'Prepárate, pronto tendrás clases con…', h: `<div class="wl-list">${up.map(c => `<div class="wl-item"><span>${esc(c.clienteName)}</span><small>${dayWord(c)} ·${hmLabel(c)}</small></div>`).join('')}</div>` });
+      if (up.length) out.push({ e: '⏰', t: 'Prepárate, pronto tendrás clases con…', h: `<div class="wl-list">${up.map(c => `<div class="wl-item"><span>${esc(c.clienteName)}</span><small>${dayWord(c)} · ${hmLabel(c)}</small></div>`).join('')}</div>` });
 
       const done = currentClasses.filter(c => c.completed && dayOf(c).slice(0, 7) === today.slice(0, 7)), inc = sumCost(done);
       const pend = currentClasses.filter(c => !c.completed && !c.cancelled && startOf(c) > now && dayOf(c).slice(0, 7) === today.slice(0, 7)), pInc = sumCost(pend);
@@ -1029,31 +961,20 @@
       const sl = wSlides[wIdx], body = document.getElementById('wl-body');
       document.getElementById('wl-dots').innerHTML = wSlides.map((_, i) => `<i class="${i <= wIdx ? 'on' : ''}"></i>`).join('');
       body.style.animation = 'none'; void body.offsetWidth; body.style.animation = '';
+      if (wIdx > 0 || sl.e === '🏆' || sl.e === '🏁') SFX.play(sl.e === '🏆' ? 'achieve' : sl.e === '🏁' ? 'success' : 'swipe');
       body.innerHTML = `<div class="wl-big">${sl.e}</div><h3 style="font-size:1.2rem;margin-bottom:8px;">${sl.t}</h3>${sl.h}`;
       document.getElementById('wl-next').textContent = wIdx === wSlides.length - 1 ? '¡A trabajar!' : 'Siguiente';
       document.getElementById('wl-skip').style.display = wIdx === wSlides.length - 1 ? 'none' : 'block';
     }
     window.showWelcome = (force) => {
       if (welcomeOpen || !classesLoaded) return;
-      playSound('enter'); // Sonido al abrir la modal de bienvenida
       if (!force) ls('cm_welcome_day', iso(new Date()));
       wSlides = buildSlides(!!force); wIdx = 0; welcomeOpen = true;
       document.getElementById('welcome-modal').classList.add('active'); renderSlide();
       try { closeDrawer(); } catch (e) {}
     };
-    function closeWelcome() { 
-      playSound('close'); // Sonido al cerrar la modal de bienvenida
-      document.getElementById('welcome-modal').classList.remove('active'); 
-      welcomeOpen = false; 
-      setTimeout(checkEnded, 500); 
-    }
-    document.getElementById('wl-next').onclick = () => { 
-      if (wIdx < wSlides.length - 1) { 
-        playSound('tab'); 
-        wIdx++; 
-        renderSlide(); 
-      } else closeWelcome(); 
-    };
+    function closeWelcome() { document.getElementById('welcome-modal').classList.remove('active'); welcomeOpen = false; setTimeout(checkEnded, 500); }
+    document.getElementById('wl-next').onclick = () => { if (wIdx < wSlides.length - 1) { wIdx++; renderSlide(); } else closeWelcome(); };
     document.getElementById('wl-skip').onclick = closeWelcome;
     window.goGoal = () => { closeWelcome(); switchTab('ingresos'); setTimeout(() => document.getElementById('goal-input')?.focus(), 350); };
     function maybeShowWelcome() {
@@ -1067,23 +988,98 @@
     }
     document.getElementById('goal-input').value = ls('cm_goal') || '';
     document.getElementById('goal-save').onclick = () => {
-      playSound('tab');
       const v = parseFloat(document.getElementById('goal-input').value) || 0;
       ls('cm_goal', String(v)); alert(v > 0 ? `Meta guardada: ${money(v)}` : 'Meta eliminada');
     };
 
+    // ---------- EFECTOS DE SONIDO (sintetizados, sin archivos) ----------
+    const SFX = (() => {
+      let ctx = null, master = null;
+      const ac = () => {
+        if (!ctx) {
+          try {
+            ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const comp = ctx.createDynamicsCompressor(); master = ctx.createGain(); master.gain.value = 1.8;
+            master.connect(comp); comp.connect(ctx.destination);
+          } catch (e) { return null; }
+        }
+        return ctx;
+      };
+      const unlock = () => {
+        const c = ac(); if (!c) return;
+        if (c.state !== 'running') c.resume().catch(() => {});
+        try { const b = c.createBuffer(1, 1, 22050), src = c.createBufferSource(); src.buffer = b; src.connect(c.destination); src.start(0); } catch (e) {}
+      };
+      const tone = (f, t0, d, type = 'triangle', v = .35, f2) => {
+        const c = ac(); if (!c) return; const t = c.currentTime + t0, o = c.createOscillator(), g = c.createGain();
+        o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+        g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+        o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .03);
+      };
+      const whoosh = (d = .22, v = .6) => {
+        const c = ac(); if (!c) return; const n = Math.floor(c.sampleRate * d), buf = c.createBuffer(1, n, c.sampleRate), data = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) data[i] = Math.random() * 2 - 1;
+        const src = c.createBufferSource(), flt = c.createBiquadFilter(), g = c.createGain(), t = c.currentTime;
+        src.buffer = buf; flt.type = 'bandpass'; flt.Q.value = 1.1; flt.frequency.setValueAtTime(500, t); flt.frequency.exponentialRampToValueAtTime(3200, t + d);
+        g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + d * .4); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+        src.connect(flt); flt.connect(g); g.connect(master); src.start(t);
+      };
+      const lib = {
+        click: () => tone(880, 0, .09, 'triangle', .35, 660),
+        tick: () => tone(1400, 0, .045, 'square', .1),
+        tab: () => tone(700, 0, .1, 'triangle', .35, 1100),
+        enter: () => { tone(660, 0, .12, 'triangle', .35); tone(990, .09, .18, 'triangle', .35); },
+        close: () => { tone(990, 0, .1, 'triangle', .3); tone(660, .08, .16, 'triangle', .3); },
+        swipe: () => whoosh(),
+        success: () => [659, 784, 988].forEach((f, i) => tone(f, i * .1, .25, 'triangle', .35)),
+        achieve: () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .09, .26, 'triangle', .35)); tone(1568, .36, .45, 'sine', .3); },
+        alert: () => { tone(988, 0, .14, 'triangle', .4); tone(740, .17, .22, 'triangle', .4); },
+        error: () => tone(260, 0, .22, 'sawtooth', .25, 150)
+      };
+      return {
+        play: (n) => {
+          if (ls('cm_sound') === 'off') return;
+          const c = ac(); if (!c) return;
+          const go = () => { try { lib[n]?.(); } catch (e) {} };
+          if (c.state === 'running') go(); else c.resume().then(go).catch(() => {});
+        },
+        unlock
+      };
+    })();
+
+    ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, SFX.unlock, { passive: true }));
+
+    // Clics: sonido según el tipo de control
+    const SND_MAP = [['#snd-toggle', null], ['.check-btn:not(.active)', null], ['.check-btn', 'click'], ['#ended-yes', null], ['#ended-later', null], ['#ended-cancel', null], ['#wl-skip', null], ['#wl-next', null],
+      ['.delete-btn', 'error'], ['.sched-nav', 'swipe'], ['.menu-toggle', 'swipe'], ['.nav-button', 'tab'], ['.drawer-item', 'tab'], ['.day-pill', 'tick'], ['.sg-cell:not(.empty)', 'tick'], ['.chip', 'tick'], ['button', 'click']];
+    document.addEventListener('click', (e) => { for (const [sel, snd] of SND_MAP) { if (e.target.closest(sel)) { if (snd) SFX.play(snd); return; } } }, true);
+
+    // Entrar / cerrar: cualquier ventana o el menú lateral
+    const sfxObs = new MutationObserver(ms => ms.forEach(m => {
+      const el = m.target, was = (m.oldValue || '').split(' ').includes('active'), is = el.classList.contains('active');
+      if (was === is) return;
+      if (is) SFX.play(el.id === 'success-modal' ? 'success' : el.id === 'ended-modal' ? 'alert' : el.id === 'drawer' ? 'swipe' : 'enter');
+      else SFX.play(el.id === 'drawer' ? 'swipe' : 'close');
+    }));
+    document.querySelectorAll('.modal-overlay, #drawer').forEach(el => sfxObs.observe(el, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }));
+
+    // Desplazar: tic al deslizar el calendario y las filas de chips
+    let lastTick = 0;
+    document.addEventListener('scroll', (e) => {
+      const t = e.target; if (!t.classList || !(t.classList.contains('calendar-strip') || t.classList.contains('chip-row'))) return;
+      const n = performance.now(); if (n - lastTick > 70) { lastTick = n; SFX.play('tick'); }
+    }, true);
+
+    // Interruptor de sonidos en el menú
+    const updSnd = () => { document.getElementById('snd-label').textContent = 'Sonidos: ' + (ls('cm_sound') === 'off' ? 'silenciados' : 'activados'); };
+    document.getElementById('snd-toggle').addEventListener('click', () => { ls('cm_sound', ls('cm_sound') === 'off' ? 'on' : 'off'); updSnd(); SFX.play('success'); });
+    updSnd();
+
     // ---------- UI general ----------
-    function showSuccessModal() { 
-      playSound('enter'); 
-      document.getElementById('success-modal').classList.add('active'); 
-    }
-    window.closeSuccessModal = () => {
-      playSound('close');
-      document.getElementById('success-modal').classList.remove('active');
-    };
+    function showSuccessModal() { document.getElementById('success-modal').classList.add('active'); }
+    window.closeSuccessModal = () => document.getElementById('success-modal').classList.remove('active');
 
     window.switchTab = (tabName) => {
-      playSound('tab'); // Sonido al cambiar de pestaña
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-button').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
@@ -1095,23 +1091,14 @@
     const menuBtn = document.getElementById('menu-btn');
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('drawer-overlay');
-    menuBtn.addEventListener('click', () => { 
-      playSound('enter'); // Sonido al abrir menú desplegable
-      drawer.classList.add('active'); 
-      overlay.classList.add('active'); 
-    });
+    menuBtn.addEventListener('click', () => { drawer.classList.add('active'); overlay.classList.add('active'); });
     overlay.addEventListener('click', closeDrawer);
-    function closeDrawer() { 
-      if (drawer.classList.contains('active')) playSound('close'); // Sonido al cerrar menú
-      drawer.classList.remove('active'); 
-      overlay.classList.remove('active'); 
-    }
+    function closeDrawer() { drawer.classList.remove('active'); overlay.classList.remove('active'); }
 
     let deferredPrompt;
     const installBtn = document.getElementById('pwa-install-btn');
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'block'; });
     installBtn.addEventListener('click', () => {
-      playSound('tab');
       if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { installBtn.style.display = 'none'; }); }
     });
   </script>
